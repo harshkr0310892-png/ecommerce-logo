@@ -34,7 +34,7 @@ export default function ContactUs() {
                     <div>
                       <h3 className="font-display font-semibold">Customer Support</h3>
                       <p className="text-muted-foreground text-sm">
-                        For order-related queries and general assistance
+                        For order-related queries and general assistance <br /> and if you want to return your <br />order within 7 days then fill contact form <br />and we will replace your order but if we saw that <br />you are not satisfied with our product then we <br />will give you a refund.but if we find any kind of <br />issue with your order then we will solve it as <br />soon as possible.
                       </p>
                     </div>
                   </div>
