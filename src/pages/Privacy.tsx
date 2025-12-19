@@ -49,6 +49,15 @@ export default function PrivacyPolicy() {
               <li>Request details of the data we hold about you.</li>
             </ul>
           </section>
+           <section className="bg-card border border-border/50 rounded-xl p-5 space-y-2">
+            <h2 className="font-display text-xl font-semibold">payment method</h2>
+            <ul className="list-disc pl-5 text-muted-foreground space-y-1">
+              <li>we use razorpay as payment method for secure payment</li>
+              <li>we did not use any kind of untrusted cookies</li>
+              <li>we also do not hold or store any kind of your banking data or credit data because we use razorpay as a trusted payment gateway</li>
+              <li>we do not leak any of our user order details</li>
+            </ul>
+          </section>
         </div>
       </div>
     </Layout>
