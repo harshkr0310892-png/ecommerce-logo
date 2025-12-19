@@ -1,0 +1,266 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/500.css';
+@import '@fontsource/playfair-display/600.css';
+@import '@fontsource/playfair-display/700.css';
+
+@layer base {
+  :root {
+    /* Royal Light Theme - Cream & Gold */
+    --background: 45 30% 97%;
+    --foreground: 30 20% 15%;
+
+    --card: 45 25% 95%;
+    --card-foreground: 30 20% 15%;
+
+    --popover: 45 25% 95%;
+    --popover-foreground: 30 20% 15%;
+
+    --primary: 43 74% 49%;
+    --primary-foreground: 30 20% 10%;
+
+    --secondary: 30 15% 88%;
+    --secondary-foreground: 30 20% 20%;
+
+    --muted: 30 10% 90%;
+    --muted-foreground: 30 10% 45%;
+
+    --accent: 43 60% 55%;
+    --accent-foreground: 30 20% 10%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 20% 85%;
+    --input: 30 20% 85%;
+    --ring: 43 74% 49%;
+
+    --radius: 0.5rem;
+
+    /* Royal specific */
+    --gold: 43 74% 49%;
+    --gold-light: 45 70% 65%;
+    --gold-dark: 40 80% 35%;
+    --cream: 45 30% 97%;
+    --cream-dark: 40 20% 90%;
+    --royal-text: 30 20% 15%;
+
+    --sidebar-background: 45 25% 95%;
+    --sidebar-foreground: 30 20% 20%;
+    --sidebar-primary: 43 74% 49%;
+    --sidebar-primary-foreground: 30 20% 10%;
+    --sidebar-accent: 30 15% 88%;
+    --sidebar-accent-foreground: 30 20% 20%;
+    --sidebar-border: 30 20% 85%;
+    --sidebar-ring: 43 74% 49%;
+  }
+
+  .dark {
+    /* Royal Dark Theme - Deep Charcoal & Gold */
+    --background: 220 20% 10%;
+    --foreground: 45 20% 92%;
+
+    --card: 220 18% 14%;
+    --card-foreground: 45 20% 92%;
+
+    --popover: 220 18% 14%;
+    --popover-foreground: 45 20% 92%;
+
+    --primary: 43 74% 55%;
+    --primary-foreground: 220 20% 10%;
+
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 45 20% 90%;
+
+    --muted: 220 12% 18%;
+    --muted-foreground: 45 10% 60%;
+
+    --accent: 43 65% 50%;
+    --accent-foreground: 220 20% 10%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 43 74% 55%;
+
+    /* Royal specific dark */
+    --gold: 43 74% 55%;
+    --gold-light: 45 70% 70%;
+    --gold-dark: 40 80% 40%;
+    --cream: 45 20% 92%;
+    --cream-dark: 220 20% 10%;
+    --royal-text: 45 20% 92%;
+
+    --sidebar-background: 220 18% 12%;
+    --sidebar-foreground: 45 20% 90%;
+    --sidebar-primary: 43 74% 55%;
+    --sidebar-primary-foreground: 220 20% 10%;
+    --sidebar-accent: 220 15% 20%;
+    --sidebar-accent-foreground: 45 20% 90%;
+    --sidebar-border: 220 15% 22%;
+    --sidebar-ring: 43 74% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+
+  .border-gold {
+    border-color: hsl(var(--gold));
+  }
+
+  .gradient-gold {
+    background: linear-gradient(135deg, hsl(var(--gold-dark)), hsl(var(--gold)), hsl(var(--gold-light)));
+  }
+
+  .gradient-gold-text {
+    background: linear-gradient(135deg, hsl(var(--gold-dark)), hsl(var(--gold)), hsl(var(--gold-light)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .royal-shadow {
+    box-shadow: 0 4px 20px -4px hsl(var(--gold) / 0.3);
+  }
+
+  .royal-shadow-lg {
+    box-shadow: 0 8px 40px -8px hsl(var(--gold) / 0.4);
+  }
+
+  .royal-glow {
+    box-shadow: 0 0 30px hsl(var(--gold) / 0.2);
+  }
+}
+
+/* Royal animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--gold) / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px hsl(var(--gold) / 0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-fade-in-scale {
+  animation: fade-in-scale 0.4s ease-out forwards;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--gold) / 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s infinite;
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--gold) / 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--gold));
+}
