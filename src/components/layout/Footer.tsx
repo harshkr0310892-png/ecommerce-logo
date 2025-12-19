@@ -18,7 +18,7 @@ export const Footer = () => {
                 <Leaf className="w-7 h-7 text-white" />
               </div>
               <span className="font-display text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-800 dark:from-green-400 dark:to-emerald-300 bg-clip-text text-transparent">
-                Royal Eco Store
+                Kiran Store
               </span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">

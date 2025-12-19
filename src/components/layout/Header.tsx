@@ -34,7 +34,7 @@ export const Header = () => {
               <Leaf className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <span className="font-display text-lg sm:text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-800 dark:from-green-400 dark:to-emerald-300 bg-clip-text text-transparent whitespace-nowrap overflow-hidden text-ellipsis max-w-[140px] sm:max-w-none">
-              Royal Eco<span className="hidden sm:inline"> Store</span>
+              kirana<span className="hidden sm:inline"> Store</span>
             </span>
           </Link>
 
