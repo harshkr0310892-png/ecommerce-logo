@@ -32,6 +32,7 @@ interface AttributeValue {
   attribute_id: string;
   value: string;
   sort_order: number;
+  value_icon_url?: string | null;
 }
 
 export function AttributesManager() {
@@ -42,7 +43,7 @@ export function AttributesManager() {
   const [selectedAttributeId, setSelectedAttributeId] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState<AttributeValue | null>(null);
   const [attributeForm, setAttributeForm] = useState({ name: '', icon_url: '' });
-  const [valueForm, setValueForm] = useState({ value: '' });
+  const [valueForm, setValueForm] = useState({ value: '', value_icon_url: '' });
 
   // Fetch attributes
   const { data: attributes, isLoading: attributesLoading } = useQuery({
@@ -117,17 +118,17 @@ export function AttributesManager() {
 
   // Add/Edit value mutation
   const valueMutation = useMutation({
-    mutationFn: async (data: { id?: string; attribute_id: string; value: string }) => {
+    mutationFn: async (data: { id?: string; attribute_id: string; value: string; value_icon_url?: string | null }) => {
       if (data.id) {
         const { error } = await supabase
           .from('product_attribute_values')
-          .update({ value: data.value })
+          .update({ value: data.value, value_icon_url: data.value_icon_url ?? null })
           .eq('id', data.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('product_attribute_values')
-          .insert({ attribute_id: data.attribute_id, value: data.value });
+          .insert({ attribute_id: data.attribute_id, value: data.value, value_icon_url: data.value_icon_url ?? null });
         if (error) throw error;
       }
     },
@@ -165,7 +166,7 @@ export function AttributesManager() {
   };
 
   const resetValueForm = () => {
-    setValueForm({ value: '' });
+    setValueForm({ value: '', value_icon_url: '' });
     setEditingValue(null);
     setSelectedAttributeId(null);
   };
@@ -179,14 +180,14 @@ export function AttributesManager() {
   const openAddValue = (attributeId: string) => {
     setSelectedAttributeId(attributeId);
     setEditingValue(null);
-    setValueForm({ value: '' });
+    setValueForm({ value: '', value_icon_url: '' });
     setValueDialogOpen(true);
   };
 
   const openEditValue = (val: AttributeValue) => {
     setEditingValue(val);
     setSelectedAttributeId(val.attribute_id);
-    setValueForm({ value: val.value });
+    setValueForm({ value: val.value, value_icon_url: val.value_icon_url || '' });
     setValueDialogOpen(true);
   };
 
@@ -279,6 +280,9 @@ export function AttributesManager() {
                       key={val.id}
                       className="group flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg text-sm"
                     >
+                      {val.value_icon_url ? (
+                        <img src={val.value_icon_url} alt="" className="w-4 h-4 rounded object-cover" />
+                      ) : null}
                       <span>{val.value}</span>
                       <button
                         onClick={() => openEditValue(val)}
@@ -365,9 +369,49 @@ export function AttributesManager() {
               <Label>Value</Label>
               <Input
                 value={valueForm.value}
-                onChange={(e) => setValueForm({ value: e.target.value })}
+                onChange={(e) => setValueForm({ ...valueForm, value: e.target.value })}
                 placeholder="e.g., S, M, L, Red, Blue"
               />
+            </div>
+            <div>
+              <Label>Logo URL (optional)</Label>
+              <Input
+                value={valueForm.value_icon_url}
+                onChange={(e) => setValueForm({ ...valueForm, value_icon_url: e.target.value })}
+                placeholder="https://...logo.png"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Paste a URL or upload below to auto-fill.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="inline-flex items-center gap-2 px-3 py-2 border rounded cursor-pointer text-sm hover:bg-muted/50">
+                <Plus className="w-4 h-4" /> Upload Logo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const ext = file.name.split('.').pop();
+                      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                      const filePath = `attribute-values/${fileName}`;
+                      const { error } = await supabase.storage.from('product-images').upload(filePath, file);
+                      if (error) throw error;
+                      const { data } = supabase.storage.from('product-images').getPublicUrl(filePath);
+                      setValueForm((prev) => ({ ...prev, value_icon_url: data.publicUrl }));
+                      toast.success('Logo uploaded');
+                    } catch (err) {
+                      console.error(err);
+                      toast.error('Failed to upload logo');
+                    }
+                    e.currentTarget.value = '';
+                  }}
+                />
+              </label>
+              {valueForm.value_icon_url ? (
+                <img src={valueForm.value_icon_url} className="w-8 h-8 rounded object-cover border" alt="preview" />
+              ) : null}
             </div>
             <Button
               variant="royal"
@@ -377,6 +421,7 @@ export function AttributesManager() {
                   id: editingValue?.id,
                   attribute_id: selectedAttributeId!,
                   value: valueForm.value,
+                  value_icon_url: valueForm.value_icon_url || null,
                 })
               }
               disabled={!valueForm.value.trim() || !selectedAttributeId || valueMutation.isPending}

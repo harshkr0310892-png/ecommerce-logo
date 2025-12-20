@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Minus, Plus, ChevronDown, ChevronUp } from "lucide-react";
 
 interface VariantAttributeValue {
   attribute_value_id: string;
@@ -9,6 +11,7 @@ interface VariantAttributeValue {
     id: string;
     value: string;
     attribute_id: string;
+    value_icon_url?: string | null;
     product_attributes: {
       id: string;
       name: string;
@@ -37,6 +40,7 @@ interface VariantSelectorProps {
 export function VariantSelector({ productId, basePrice, onVariantChange }: VariantSelectorProps) {
   // selectedAttributes: map of attribute_id -> attribute_value_id
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
+  const [openAttributes, setOpenAttributes] = useState<Record<string, boolean>>({});
 
   // Fetch variants with all nested attribute data
   const { data: variants, isLoading } = useQuery({
@@ -57,6 +61,7 @@ export function VariantSelector({ productId, basePrice, onVariantChange }: Varia
               id,
               value,
               attribute_id,
+              value_icon_url,
               product_attributes (
                 id,
                 name,
@@ -83,7 +88,7 @@ export function VariantSelector({ productId, basePrice, onVariantChange }: Varia
       name: string;
       icon_url: string | null;
       sort_order: number;
-      values: Map<string, { id: string; value: string; sort_order: number }>;
+      values: Map<string, { id: string; value: string; sort_order: number; value_icon_url?: string | null }>;
     }>();
 
     variants.forEach(variant => {
@@ -107,7 +112,7 @@ export function VariantSelector({ productId, basePrice, onVariantChange }: Varia
             // We don't have sort_order for value in this query, defaulting to 0 or we could fetch it
             // Actually, product_attribute_values table has sort_order, but we didn't select it above.
             // Let's rely on default sorting or index for now.
-            attrEntry.values.set(attrVal.id, { id: attrVal.id, value: attrVal.value, sort_order: 0 });
+            attrEntry.values.set(attrVal.id, { id: attrVal.id, value: attrVal.value, sort_order: 0, value_icon_url: attrVal.value_icon_url ?? null });
         }
       });
     });
@@ -119,6 +124,23 @@ export function VariantSelector({ productId, basePrice, onVariantChange }: Varia
         values: Array.from(attr.values.values()) // Convert values map to array
       }));
   }, [variants]);
+
+  useEffect(() => {
+    if (productAttributes.length === 0) return;
+    setOpenAttributes(prev => {
+      const next = { ...prev };
+      let changed = false;
+
+      for (const attr of productAttributes) {
+        if (next[attr.id] === undefined) {
+          next[attr.id] = true;
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [productAttributes]);
 
   // Handle selection with smart switching for incompatible attributes
   const handleSelect = (attributeId: string, valueId: string) => {
@@ -307,47 +329,232 @@ export function VariantSelector({ productId, basePrice, onVariantChange }: Varia
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {productAttributes.map(attr => (
-        <div key={attr.id}>
-          <div className="flex items-center gap-2 mb-3">
-            {attr.icon_url && (
-              <img src={attr.icon_url} alt="" className="w-5 h-5 object-contain" />
-            )}
-            <span className="font-medium">{attr.name}:</span>
-          </div>
-          
-          <div className="flex flex-wrap gap-3">
-            {attr.values.map(val => {
-              const isSelected = selectedAttributes[attr.id] === val.id;
-              const available = isValueAvailable(attr.id, val.id);
-              const outOfStock = available && isValueOutOfStock(attr.id, val.id);
-              
-              // If not available (meaning no variant exists with this combination), disable it.
-              // We might want to allow clicking it to reset other selections, but for now disable.
-              
-              return (
-                <button
-                  key={val.id}
-                  onClick={() => handleSelect(attr.id, val.id)}
-                  className={cn(
-                    "px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all",
-                    isSelected
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border hover:border-primary/50",
-                    !available && !isSelected && "opacity-50 border-dashed bg-muted/50", // Unavailable but not selected
-                    !available && isSelected && "bg-destructive/10 border-destructive/50 text-destructive", // Should not happen with smart switch, but fallback
-                    outOfStock && !isSelected && "opacity-60 bg-muted text-muted-foreground decoration-dashed"
+        <Collapsible
+          key={attr.id}
+          open={openAttributes[attr.id] ?? true}
+          onOpenChange={(open) => setOpenAttributes(prev => ({ ...prev, [attr.id]: open }))}
+          className="group"
+        >
+          <div className="flex items-center justify-between rounded-lg transition-colors duration-300 hover:bg-muted/50">
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="flex w-full items-center justify-between gap-3 p-3 rounded-lg transition-all duration-300 hover:bg-muted/30"
+              >
+                <div className="flex items-center gap-3">
+                  {attr.icon_url && (
+                    <img 
+                      src={attr.icon_url} 
+                      alt="" 
+                      className="w-5 h-5 object-contain transition-transform duration-300 group-data-[state=open]:rotate-180"
+                    />
                   )}
-                  title={!available ? "Switch to this option" : outOfStock ? "Out of stock" : ""}
-                >
-                  {val.value}
-                  {outOfStock && <span className="ml-1 text-[10px] text-destructive">(Out)</span>}
-                </button>
-              );
-            })}
+                  <span className="font-medium text-foreground/90">{attr.name}:</span>
+                </div>
+                <span className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180">
+                  {(openAttributes[attr.id] ?? true) ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </span>
+              </button>
+            </CollapsibleTrigger>
           </div>
-        </div>
+
+          <CollapsibleContent 
+            className="overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+            style={{
+              transitionProperty: 'max-height, opacity',
+              willChange: 'max-height, opacity'
+            }}
+          >
+            <div className="flex flex-wrap gap-2 p-1">
+              {attr.values.map(val => {
+                const isSelected = selectedAttributes[attr.id] === val.id;
+                const available = isValueAvailable(attr.id, val.id);
+                const outOfStock = available && isValueOutOfStock(attr.id, val.id);
+                const isColor = attr.name.toLowerCase().includes('color') || attr.name.toLowerCase().includes('colour');
+                
+                // Try to parse color from value (e.g., "Red" -> red color)
+                let colorStyle = {};
+                if (isColor) {
+                  try {
+                    // Color mapping with unique keys
+                    const colorMap: Record<string, string> = {
+                      // Basic colors
+                      'red': 'bg-red-500',
+                      'blue': 'bg-blue-500',
+                      'green': 'bg-green-500',
+                      'black': 'bg-black',
+                      'white': 'bg-white border',
+                      'yellow': 'bg-yellow-400',
+                      'pink': 'bg-pink-400',
+                      'purple': 'bg-purple-500',
+                      'gray': 'bg-gray-400',
+                      'brown': 'bg-amber-800',
+                      'beige': 'bg-amber-100',
+                      'navy': 'bg-blue-900',
+                      'maroon': 'bg-red-800',
+                      'teal': 'bg-teal-500',
+                      'olive': 'bg-yellow-600',
+                      'lime': 'bg-lime-400',
+                      'orange': 'bg-orange-400',
+                      'violet': 'bg-violet-600',
+                      'indigo': 'bg-indigo-600',
+                      'cyan': 'bg-cyan-400',
+                      'fuchsia': 'bg-fuchsia-500',
+                      'rose': 'bg-rose-400',
+                      'amber': 'bg-amber-400',
+                      'emerald': 'bg-emerald-400',
+                      'sky': 'bg-sky-400',
+                      
+                      // Color variations
+                      'light blue': 'bg-sky-300',
+                      'dark blue': 'bg-blue-800',
+                      'light green': 'bg-green-300',
+                      'dark green': 'bg-green-800',
+                      'light gray': 'bg-gray-300',
+                      'dark gray': 'bg-gray-600',
+                      'charcoal': 'bg-gray-700',
+                      'cream': 'bg-amber-50',
+                      'gold': 'bg-yellow-400',
+                      'silver': 'bg-gray-300',
+                      'bronze': 'bg-amber-700',
+                      'copper': 'bg-orange-700',
+                      'burgundy': 'bg-red-900',
+                      'mint': 'bg-emerald-200',
+                      'lavender': 'bg-purple-200',
+                      'coral': 'bg-coral-400',
+                      'peach': 'bg-orange-200',
+                      'mauve': 'bg-pink-200',
+                      'mustard': 'bg-yellow-600',
+                      'taupe': 'bg-stone-400',
+                      'khaki': 'bg-khaki-400',
+                      'ivory': 'bg-ivory-100',
+                      'off white': 'bg-amber-50',
+                      'navy blue': 'bg-blue-900',
+                      'royal blue': 'bg-blue-600',
+                      'baby blue': 'bg-blue-200',
+                      'forest green': 'bg-green-700',
+                      'olive green': 'bg-yellow-800',
+                      'lime green': 'bg-lime-500',
+                      'teal blue': 'bg-teal-400',
+                      'turquoise': 'bg-cyan-400',
+                      'aqua': 'bg-cyan-300',
+                      'magenta': 'bg-fuchsia-500',
+                      'hot pink': 'bg-pink-500',
+                      'dusty rose': 'bg-rose-300',
+                      'blush': 'bg-rose-200',
+                      'nude': 'bg-amber-100',
+                      'camel': 'bg-amber-300',
+                      'cognac': 'bg-amber-700',
+                      'espresso': 'bg-amber-900',
+                      'wine': 'bg-red-900',
+                      'plum': 'bg-purple-800',
+                      'eggplant': 'bg-purple-900',
+                      'moss': 'bg-lime-700',
+                      'sage': 'bg-green-200',
+                      'seafoam': 'bg-teal-200',
+                      'denim': 'bg-blue-600',
+                      'chambray': 'bg-blue-400',
+                      'heather': 'bg-gray-300',
+                      'stone': 'bg-stone-400',
+                      'sand': 'bg-amber-100',
+                      'oatmeal': 'bg-amber-50',
+                      'linen': 'bg-linen-100',
+                      'ecru': 'bg-eggshell-50',
+                      'champagne': 'bg-amber-100',
+                      'blonde': 'bg-yellow-100',
+                      'caramel': 'bg-amber-200',
+                      'honey': 'bg-amber-300',
+                      'chestnut': 'bg-amber-800',
+                      'auburn': 'bg-red-800',
+                      'mahogany': 'bg-red-900',
+                      'mocha': 'bg-amber-800',
+                      'cocoa': 'bg-brown-800',
+                      'mink': 'bg-gray-500',
+                      'pewter': 'bg-gray-400',
+                      'slate': 'bg-slate-500',
+                      'steel': 'bg-slate-400',
+                      'graphite': 'bg-gray-700',
+                      'ink': 'bg-gray-900',
+                      'jet black': 'bg-black',
+                      'onyx': 'bg-gray-900',
+                      'snow': 'bg-white',
+                      'pearl': 'bg-gray-100',
+                      'frost': 'bg-blue-50',
+                      'ice': 'bg-cyan-50',
+                      'periwinkle': 'bg-indigo-200',
+                      'lilac': 'bg-purple-200',
+                      'orchid': 'bg-purple-300',
+                      'berry': 'bg-red-700',
+                      'brick': 'bg-red-700',
+                      'salmon': 'bg-orange-300',
+                      'apricot': 'bg-orange-200',
+                      'mango': 'bg-yellow-300',
+                      'lemon': 'bg-yellow-200',
+                      'banana': 'bg-yellow-100',
+                      'rust': 'bg-orange-800',
+                      'terracotta': 'bg-orange-700',
+                      'cinnamon': 'bg-amber-700',
+                      'chocolate': 'bg-brown-700'
+                    };
+                    
+                    // Try to find a matching color name
+                    const colorName = Object.keys(colorMap).find(color => 
+                      val.value.toLowerCase().includes(color)
+                    );
+                    
+                    if (colorName) {
+                      colorStyle = { backgroundColor: colorMap[colorName] };
+                    } else {
+                      // Fallback to a default color if no match
+                      colorStyle = { backgroundColor: '#e5e7eb' };
+                    }
+                  } catch (e) {
+                    console.error('Error setting color:', e);
+                  }
+                }
+
+                return (
+                  <button
+                    key={val.id}
+                    onClick={() => handleSelect(attr.id, val.id)}
+                    className={cn(
+                      "relative px-4 py-2 text-sm font-medium transition-all duration-300 ease-out",
+                      "transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/50",
+                      "rounded-full border-2 flex items-center justify-center min-h-10 min-w-10",
+                      isSelected
+                        ? "border-primary bg-primary/10 text-primary shadow-md"
+                        : "border-border hover:border-primary/50 hover:bg-muted/30",
+                      !available && !isSelected && "opacity-50 border-dashed bg-muted/50",
+                      !available && isSelected && "bg-destructive/10 border-destructive/50 text-destructive",
+                      outOfStock && !isSelected && "opacity-60 bg-muted/50 text-muted-foreground decoration-dashed"
+                    )}
+                    title={!available ? "Switch to this option" : outOfStock ? "Out of stock" : val.value}
+                    >
+                    <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                      {val.value_icon_url ? (
+                        <img src={val.value_icon_url} alt="" className="w-4 h-4 object-contain" />
+                      ) : null}
+                      <span>{val.value}</span>
+                      {outOfStock && <span className="ml-1 text-[10px] text-destructive">(Out)</span>}
+                    </span>
+                    {isSelected && (
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/75"></span>
+                        <span className="relative inline-flex rounded-full h-4 w-4 bg-primary"></span>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       ))}
     </div>
   );
