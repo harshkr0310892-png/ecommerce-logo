@@ -22,7 +22,8 @@ export function Layout({ children, showHeader = true, showFooter = true }: Layou
     '/wishlist'
   ];
   
-  const shouldShowFooter = showFooter && !hideFooterPaths.includes(location.pathname);
+  // Hide footer on dynamic product detail routes too
+  const shouldShowFooter = showFooter && !hideFooterPaths.includes(location.pathname) && !location.pathname.startsWith('/product/');
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
