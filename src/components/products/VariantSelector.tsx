@@ -12,6 +12,7 @@ interface VariantAttributeValue {
     value: string;
     attribute_id: string;
     value_icon_url?: string | null;
+    value_icon_shape?: 'circle' | 'square' | 'rectangle' | 'triangle' | null;
     product_attributes: {
       id: string;
       name: string;
@@ -62,6 +63,7 @@ export function VariantSelector({ productId, basePrice, onVariantChange }: Varia
               value,
               attribute_id,
               value_icon_url,
+              value_icon_shape,
               product_attributes (
                 id,
                 name,
@@ -88,7 +90,7 @@ export function VariantSelector({ productId, basePrice, onVariantChange }: Varia
       name: string;
       icon_url: string | null;
       sort_order: number;
-      values: Map<string, { id: string; value: string; sort_order: number; value_icon_url?: string | null }>;
+      values: Map<string, { id: string; value: string; sort_order: number; value_icon_url?: string | null; value_icon_shape?: 'circle' | 'square' | 'rectangle' | 'triangle' | null }>;
     }>();
 
     variants.forEach(variant => {
@@ -112,7 +114,7 @@ export function VariantSelector({ productId, basePrice, onVariantChange }: Varia
             // We don't have sort_order for value in this query, defaulting to 0 or we could fetch it
             // Actually, product_attribute_values table has sort_order, but we didn't select it above.
             // Let's rely on default sorting or index for now.
-            attrEntry.values.set(attrVal.id, { id: attrVal.id, value: attrVal.value, sort_order: 0, value_icon_url: attrVal.value_icon_url ?? null });
+            attrEntry.values.set(attrVal.id, { id: attrVal.id, value: attrVal.value, sort_order: 0, value_icon_url: attrVal.value_icon_url ?? null, value_icon_shape: (attrVal as any).value_icon_shape ?? null });
         }
       });
     });
@@ -538,7 +540,14 @@ export function VariantSelector({ productId, basePrice, onVariantChange }: Varia
                     >
                     <span className="inline-flex items-center gap-2 whitespace-nowrap">
                       {val.value_icon_url ? (
-                        <img src={val.value_icon_url} alt="" className="w-4 h-4 object-contain" />
+                        <img
+                          src={val.value_icon_url}
+                          alt=""
+                          className={
+                            `object-cover ${val.value_icon_shape === 'circle' ? 'rounded-full' : val.value_icon_shape === 'square' ? 'rounded-md' : 'rounded-sm'} ${val.value_icon_shape === 'rectangle' ? 'w-8 h-5' : 'w-7 h-7'}`
+                          }
+                          style={val.value_icon_shape === 'triangle' ? { clipPath: 'polygon(50% 0, 0 100%, 100% 100%)' } : undefined}
+                        />
                       ) : null}
                       <span>{val.value}</span>
                       {outOfStock && <span className="ml-1 text-[10px] text-destructive">(Out)</span>}

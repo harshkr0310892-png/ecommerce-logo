@@ -19,6 +19,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Attribute {
   id: string;
@@ -33,6 +34,7 @@ interface AttributeValue {
   value: string;
   sort_order: number;
   value_icon_url?: string | null;
+  value_icon_shape?: 'circle' | 'square' | 'rectangle' | 'triangle' | null;
 }
 
 export function AttributesManager() {
@@ -43,7 +45,7 @@ export function AttributesManager() {
   const [selectedAttributeId, setSelectedAttributeId] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState<AttributeValue | null>(null);
   const [attributeForm, setAttributeForm] = useState({ name: '', icon_url: '' });
-  const [valueForm, setValueForm] = useState({ value: '', value_icon_url: '' });
+  const [valueForm, setValueForm] = useState({ value: '', value_icon_url: '', value_icon_shape: 'circle' as 'circle' | 'square' | 'rectangle' | 'triangle' });
 
   // Fetch attributes
   const { data: attributes, isLoading: attributesLoading } = useQuery({
@@ -118,17 +120,17 @@ export function AttributesManager() {
 
   // Add/Edit value mutation
   const valueMutation = useMutation({
-    mutationFn: async (data: { id?: string; attribute_id: string; value: string; value_icon_url?: string | null }) => {
+    mutationFn: async (data: { id?: string; attribute_id: string; value: string; value_icon_url?: string | null; value_icon_shape?: 'circle' | 'square' | 'rectangle' | 'triangle' | null }) => {
       if (data.id) {
         const { error } = await supabase
           .from('product_attribute_values')
-          .update({ value: data.value, value_icon_url: data.value_icon_url ?? null })
+          .update({ value: data.value, value_icon_url: data.value_icon_url ?? null, value_icon_shape: data.value_icon_shape ?? null })
           .eq('id', data.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('product_attribute_values')
-          .insert({ attribute_id: data.attribute_id, value: data.value, value_icon_url: data.value_icon_url ?? null });
+          .insert({ attribute_id: data.attribute_id, value: data.value, value_icon_url: data.value_icon_url ?? null, value_icon_shape: data.value_icon_shape ?? null });
         if (error) throw error;
       }
     },
@@ -166,7 +168,7 @@ export function AttributesManager() {
   };
 
   const resetValueForm = () => {
-    setValueForm({ value: '', value_icon_url: '' });
+    setValueForm({ value: '', value_icon_url: '', value_icon_shape: 'circle' });
     setEditingValue(null);
     setSelectedAttributeId(null);
   };
@@ -180,14 +182,14 @@ export function AttributesManager() {
   const openAddValue = (attributeId: string) => {
     setSelectedAttributeId(attributeId);
     setEditingValue(null);
-    setValueForm({ value: '', value_icon_url: '' });
+    setValueForm({ value: '', value_icon_url: '', value_icon_shape: 'circle' });
     setValueDialogOpen(true);
   };
 
   const openEditValue = (val: AttributeValue) => {
     setEditingValue(val);
     setSelectedAttributeId(val.attribute_id);
-    setValueForm({ value: val.value, value_icon_url: val.value_icon_url || '' });
+    setValueForm({ value: val.value, value_icon_url: val.value_icon_url || '', value_icon_shape: (val.value_icon_shape as any) || 'circle' });
     setValueDialogOpen(true);
   };
 
@@ -281,7 +283,14 @@ export function AttributesManager() {
                       className="group flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg text-sm"
                     >
                       {val.value_icon_url ? (
-                        <img src={val.value_icon_url} alt="" className="w-4 h-4 rounded object-cover" />
+                        <img
+                          src={val.value_icon_url}
+                          alt=""
+                          className={
+                            `object-cover ${val.value_icon_shape === 'circle' ? 'rounded-full' : val.value_icon_shape === 'square' ? 'rounded-md' : 'rounded-sm'} ${val.value_icon_shape === 'rectangle' ? 'w-8 h-5' : 'w-6 h-6'}`
+                          }
+                          style={val.value_icon_shape === 'triangle' ? { clipPath: 'polygon(50% 0, 0 100%, 100% 100%)' } : undefined}
+                        />
                       ) : null}
                       <span>{val.value}</span>
                       <button
@@ -382,6 +391,20 @@ export function AttributesManager() {
               />
               <p className="text-xs text-muted-foreground mt-1">Paste a URL or upload below to auto-fill.</p>
             </div>
+            <div>
+              <Label>Logo Shape</Label>
+              <Select value={valueForm.value_icon_shape} onValueChange={(v) => setValueForm({ ...valueForm, value_icon_shape: v as any })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose shape" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="circle">Circle</SelectItem>
+                  <SelectItem value="square">Square</SelectItem>
+                  <SelectItem value="rectangle">Rectangle</SelectItem>
+                  <SelectItem value="triangle">Triangle</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex items-center gap-2">
               <label className="inline-flex items-center gap-2 px-3 py-2 border rounded cursor-pointer text-sm hover:bg-muted/50">
                 <Plus className="w-4 h-4" /> Upload Logo
@@ -422,6 +445,7 @@ export function AttributesManager() {
                   attribute_id: selectedAttributeId!,
                   value: valueForm.value,
                   value_icon_url: valueForm.value_icon_url || null,
+                  value_icon_shape: valueForm.value_icon_shape || 'circle',
                 })
               }
               disabled={!valueForm.value.trim() || !selectedAttributeId || valueMutation.isPending}
