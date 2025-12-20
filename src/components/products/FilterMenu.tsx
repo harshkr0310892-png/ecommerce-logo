@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -13,6 +13,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Filter, ArrowUpDown, X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import * as SliderPrimitive from "@radix-ui/react-slider";
+import { cn } from "@/lib/utils";
+import { PriceRange } from "@/components/ui/price-range";
 
 interface FilterMenuProps {
   categories: { id: string; name: string }[] | undefined;
@@ -26,6 +29,8 @@ interface FilterMenuProps {
   setMinPrice: (value: number | '') => void;
   maxPrice: number | '';
   setMaxPrice: (value: number | '') => void;
+  minProductPrice?: number;
+  maxProductPrice?: number;
 }
 
 export function FilterMenu({ 
@@ -39,10 +44,30 @@ export function FilterMenu({
   minPrice,
   setMinPrice,
   maxPrice,
-  setMaxPrice
+  setMaxPrice,
+  minProductPrice = 0,
+  maxProductPrice = 10000
 }: FilterMenuProps) {
   const [open, setOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  
+  // Initialize sliderValue with minProductPrice and maxProductPrice or default values
+  const defaultMin = minProductPrice ?? 0;
+  const defaultMax = maxProductPrice ?? 10000;
+  
+  // Initialize sliderValue state
+  const [sliderValue, setSliderValue] = useState<[number, number]>([
+    minPrice === '' ? defaultMin : Number(minPrice),
+    maxPrice === '' ? defaultMax : Number(maxPrice)
+  ]);
+  
+  // Update sliderValue when minPrice or maxPrice changes
+  useEffect(() => {
+    setSliderValue([
+      minPrice === '' ? defaultMin : Number(minPrice),
+      maxPrice === '' ? defaultMax : Number(maxPrice)
+    ]);
+  }, [minPrice, maxPrice, defaultMin, defaultMax]);
   
   const getCategoryName = () => {
     if (selectedCategory === 'all') return 'All Categories';
@@ -71,9 +96,18 @@ export function FilterMenu({
     if (value === '') {
       setMinPrice('');
     } else {
-      const numValue = Number(value);
-      if (!isNaN(numValue) && numValue >= 0) {
-        setMinPrice(numValue);
+      // Get the current input value as string
+      const currentValue = minPrice === '' ? '' : minPrice.toString();
+      // If the new value is a single digit and we already have a value, append it
+      if (value.length === 1 && currentValue !== '') {
+        const newValue = currentValue + value;
+        setMinPrice(parseInt(newValue, 10));
+      } else {
+        // Otherwise, handle as normal
+        const numValue = Number(value);
+        if (!isNaN(numValue) && numValue >= 0) {
+          setMinPrice(numValue);
+        }
       }
     }
   };
@@ -83,11 +117,27 @@ export function FilterMenu({
     if (value === '') {
       setMaxPrice('');
     } else {
-      const numValue = Number(value);
-      if (!isNaN(numValue) && numValue >= 0) {
-        setMaxPrice(numValue);
+      // Get the current input value as string
+      const currentValue = maxPrice === '' ? '' : maxPrice.toString();
+      // If the new value is a single digit and we already have a value, append it
+      if (value.length === 1 && currentValue !== '') {
+        const newValue = currentValue + value;
+        setMaxPrice(parseInt(newValue, 10));
+      } else {
+        // Otherwise, handle as normal
+        const numValue = Number(value);
+        if (!isNaN(numValue) && numValue >= 0) {
+          setMaxPrice(numValue);
+        }
       }
     }
+  };
+
+  const handlePriceChange = (value: [number, number]) => {
+    const [newMin, newMax] = value;
+    setSliderValue([newMin, newMax]);
+    setMinPrice(newMin === defaultMin ? '' : newMin);
+    setMaxPrice(newMax === defaultMax ? '' : newMax);
   };
 
   // Mobile filter panel
@@ -150,30 +200,13 @@ export function FilterMenu({
       <hr className="border-border" />
       
       {/* Price Range */}
-      <div>
-        <h3 className="font-medium mb-3">Price Range (₹)</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-sm text-muted-foreground">Min</label>
-            <Input 
-              type="number" 
-              placeholder="0" 
-              value={minPrice === '' ? '' : minPrice}
-              onChange={handleMinPriceChange}
-              min="0"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-muted-foreground">Max</label>
-            <Input 
-              type="number" 
-              placeholder="10000" 
-              value={maxPrice === '' ? '' : maxPrice}
-              onChange={handleMaxPriceChange}
-              min="0"
-            />
-          </div>
-        </div>
+      <div className="space-y-4">
+        <PriceRange
+          value={sliderValue}
+          onChange={handlePriceChange}
+          min={defaultMin}
+          max={defaultMax}
+        />
       </div>
       
       <hr className="border-border" />

@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Crown } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
@@ -64,6 +64,19 @@ export default function Products() {
       return data;
     },
   });
+
+  // Calculate min and max prices from products
+  const priceRange = useMemo(() => {
+    if (!products || products.length === 0) return { min: 0, max: 10000 };
+    
+    const prices = products.map(p => Number(p.price)).filter(price => !isNaN(price));
+    if (prices.length === 0) return { min: 0, max: 10000 };
+    
+    return {
+      min: Math.floor(Math.min(...prices) / 100) * 100, // Round down to nearest 100
+      max: Math.ceil(Math.max(...prices) / 100) * 100   // Round up to nearest 100
+    };
+  }, [products]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -210,19 +223,21 @@ export default function Products() {
         </div>
 
         {/* Filter Menu */}
-        <FilterMenu 
-          categories={categories}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          filter={filter}
-          setFilter={setFilter}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          minPrice={minPrice}
-          setMinPrice={setMinPrice}
-          maxPrice={maxPrice}
-          setMaxPrice={setMaxPrice}
-        />
+        <FilterMenu
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            filter={filter}
+            setFilter={setFilter}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            minPrice={minPrice}
+            setMinPrice={setMinPrice}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            minProductPrice={priceRange.min}
+            maxProductPrice={priceRange.max}
+          />
 
         {/* Products Grid */}
         {isLoading ? (
