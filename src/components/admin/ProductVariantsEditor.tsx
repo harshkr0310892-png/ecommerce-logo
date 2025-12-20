@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -51,6 +52,7 @@ export function ProductVariantsEditor({ productId, basePrice, onVariantImagesSta
   const queryClient = useQueryClient();
   
   const [selectedAttributes, setSelectedAttributes] = useState<{ attribute_id: string; attribute_value_id: string }[]>([{ attribute_id: '', attribute_value_id: '' }]);
+  const [selectedVariantIds, setSelectedVariantIds] = useState<string[]>([]);
   const [newVariant, setNewVariant] = useState({
     price: basePrice.toString(),
     stock_quantity: '0',
@@ -408,28 +410,49 @@ export function ProductVariantsEditor({ productId, basePrice, onVariantImagesSta
     return groups;
   }, [variants, attributes]);
 
-  const handleGroupImageUpload = async (groupVariants: ProductVariant[], e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (!variants) return;
+    setSelectedVariantIds(prev => prev.filter(id => variants.some(v => v.id === id)));
+  }, [variants]);
+
+  const toggleVariantSelection = (variantId: string) => {
+    setSelectedVariantIds(prev => {
+      if (prev.includes(variantId)) return prev.filter(id => id !== variantId);
+      if (prev.length >= 2) {
+        toast.error('Select only 2 variants');
+        return prev;
+      }
+      return [...prev, variantId];
+    });
+  };
+
+  const handleSelectedVariantsImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     
     try {
+      if (selectedVariantIds.length !== 2) {
+        toast.error('Please select exactly 2 variants');
+        return;
+      }
+
       const file = e.target.files[0];
       const url = await handleImageUpload(file);
       
       if (url) {
-        // Update all variants in this group
-        const promises = groupVariants.map(variant => {
+        const variantsToUpdate = (variants || []).filter(v => selectedVariantIds.includes(v.id));
+        const promises = variantsToUpdate.map(variant => {
           const currentImages = Array.isArray(variant.image_urls) ? variant.image_urls : [];
           // Avoid duplicates
-          if (currentImages.includes(url)) return Promise.resolve();
+          if (currentImages.includes(url)) return Promise.resolve(undefined);
           
           return updateVariantMutation.mutateAsync({
             id: variant.id,
-            image_urls: [...currentImages, url]
+            image_urls: [...currentImages, url].slice(0, 6)
           });
         });
 
         await Promise.all(promises);
-        toast.success('Image applied to all variants in group');
+        toast.success('Image applied to selected variants');
       }
     } catch (error) {
       console.error('Error updating group images:', error);
@@ -609,15 +632,24 @@ export function ProductVariantsEditor({ productId, basePrice, onVariantImagesSta
                     {groupName}
                   </h4>
                   <div className="flex items-center gap-2">
-                    <Label htmlFor={`group-image-${groupName}`} className="cursor-pointer text-xs flex items-center gap-2 px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-colors">
-                      <Plus className="w-3 h-3" /> Apply Image to All {groupVariants.length} Variants
+                    <Label
+                      htmlFor={`group-image-${groupName}`}
+                      className="cursor-pointer text-xs flex items-center gap-2 px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-colors"
+                      onClick={(e) => {
+                        if (selectedVariantIds.length !== 2) {
+                          e.preventDefault();
+                          toast.error('Please select exactly 2 variants');
+                        }
+                      }}
+                    >
+                      <Plus className="w-3 h-3" /> Apply Image to Selected {selectedVariantIds.length} Variants
                     </Label>
                     <input
                       id={`group-image-${groupName}`}
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={(e) => handleGroupImageUpload(groupVariants, e)}
+                      onChange={handleSelectedVariantsImageUpload}
                     />
                   </div>
                 </div>
@@ -626,6 +658,7 @@ export function ProductVariantsEditor({ productId, basePrice, onVariantImagesSta
                   <div className="flex items-center gap-4 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     <div className="flex-1">Variant Combination</div>
                     <div className="flex items-center gap-3">
+                      <div className="w-10 text-center">Select</div>
                       <div className="w-24 text-right">Price (₹)</div>
                       <div className="w-20 text-right">Stock</div>
                       <div className="w-12 text-center">Active</div>
@@ -661,6 +694,12 @@ export function ProductVariantsEditor({ productId, basePrice, onVariantImagesSta
                           </span>
                         </div>
                         <div className="flex items-center gap-3">
+                          <div className="w-10 flex justify-center">
+                            <Checkbox
+                              checked={selectedVariantIds.includes(variant.id)}
+                              onCheckedChange={() => toggleVariantSelection(variant.id)}
+                            />
+                          </div>
                           <div className="text-right">
                             <Input
                               type="number"
