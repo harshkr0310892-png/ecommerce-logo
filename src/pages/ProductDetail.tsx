@@ -183,7 +183,7 @@ export default function ProductDetail() {
     ? (!selectedVariant.is_available || selectedVariant.stock_quantity === 0)
     : product?.stock_status === 'sold_out';
   const isLowStock = selectedVariant 
-    ? (selectedVariant.stock_quantity > 0 && selectedVariant.stock_quantity <= 5)
+    ? (selectedVariant.stock_quantity > 0 && selectedVariant.stock_quantity <= 10)
     : product?.stock_status === 'low_stock';
   const stockQuantity = selectedVariant ? selectedVariant.stock_quantity : (product?.stock_quantity || 0);
   
@@ -212,7 +212,7 @@ export default function ProductDetail() {
 
   const getStockDisplay = () => {
     if (isSoldOut) return "Out of Stock";
-    if (isLowStock && stockQuantity > 0) return `Only ${stockQuantity} left!`;
+    if (stockQuantity > 0 && stockQuantity <= 10) return `Only ${stockQuantity} left!`;
     if (stockQuantity > 0) return `${stockQuantity} in stock`;
     return "In Stock";
   };

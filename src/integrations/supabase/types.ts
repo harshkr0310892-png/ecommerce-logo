@@ -366,6 +366,36 @@ export type Database = {
           },
         ]
       }
+      product_variant_values: {
+        Row: {
+          variant_id: string
+          attribute_value_id: string
+        }
+        Insert: {
+          variant_id: string
+          attribute_value_id: string
+        }
+        Update: {
+          variant_id?: string
+          attribute_value_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variant_values_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variant_values_attribute_value_id_fkey"
+            columns: ["attribute_value_id"]
+            isOneToOne: false
+            referencedRelation: "product_attribute_values"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_attributes: {
         Row: {
           created_at: string
@@ -392,7 +422,7 @@ export type Database = {
       }
       product_variants: {
         Row: {
-          attribute_value_id: string
+          attribute_value_id: string | null
           created_at: string
           id: string
           is_available: boolean | null
@@ -402,7 +432,7 @@ export type Database = {
           image_urls: Json | null
         }
         Insert: {
-          attribute_value_id: string
+          attribute_value_id?: string | null
           created_at?: string
           id?: string
           is_available?: boolean | null
@@ -412,7 +442,7 @@ export type Database = {
           image_urls?: Json | null
         }
         Update: {
-          attribute_value_id?: string
+          attribute_value_id?: string | null
           created_at?: string
           id?: string
           is_available?: boolean | null
