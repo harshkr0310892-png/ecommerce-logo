@@ -146,7 +146,7 @@ export default function Wishlist() {
                   {/* Badges */}
                   <div className="absolute top-2 left-2 flex flex-col gap-1">
                     {item.discount_percentage > 0 && (
-                      <span className="px-2 py-1 rounded-full text-xs font-bold gradient-gold text-primary-foreground">
+                      <span className="px-2 py-1 rounded-full text-xs font-bold gradient-gold text-white shadow-md">
                         -{item.discount_percentage}%
                       </span>
                     )}

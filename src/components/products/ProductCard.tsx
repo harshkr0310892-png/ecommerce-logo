@@ -193,17 +193,17 @@ export function ProductCard({
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {discount_percentage > 0 && (
-            <span className="px-2 py-1 rounded-full text-xs font-bold gradient-gold text-primary-foreground">
+            <span className="px-2 py-1 rounded-full text-xs font-bold gradient-gold text-white shadow-md">
               -{discount_percentage}%
             </span>
           )}
           {isSoldOut && (
-            <span className="px-2 py-1 rounded-full text-xs font-bold bg-destructive text-destructive-foreground">
+            <span className="px-2 py-1 rounded-full text-xs font-bold bg-destructive text-destructive-foreground shadow-md">
               Sold Out
             </span>
           )}
           {isLowStock && !isSoldOut && (
-            <span className="px-2 py-1 rounded-full text-xs font-bold bg-yellow-500 text-yellow-950">
+            <span className="px-2 py-1 rounded-full text-xs font-bold bg-amber-500 text-white shadow-md">
               Low Stock
             </span>
           )}
@@ -216,17 +216,17 @@ export function ProductCard({
           "transition-all duration-300"
         )}>
           <Link to={`/product/${id}`}>
-            <Button size="icon" variant="secondary" className="rounded-full w-8 h-8">
-              <Eye className="w-3 h-3" />
+            <Button size="icon" variant="secondary" className="rounded-full w-8 h-8 bg-background/90 backdrop-blur-sm border border-border/50 hover:bg-background">
+              <Eye className="w-3 h-3 text-primary" />
             </Button>
           </Link>
           <Button 
             size="icon" 
             variant="secondary" 
-            className="rounded-full w-8 h-8"
+            className="rounded-full w-8 h-8 bg-background/90 backdrop-blur-sm border border-border/50 hover:bg-background"
             onClick={handleShare}
           >
-            <Share2 className="w-3 h-3" />
+            <Share2 className="w-3 h-3 text-primary" />
           </Button>
           <Button 
             size="icon" 

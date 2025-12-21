@@ -564,7 +564,7 @@ export default function ProductDetail() {
               {/* Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
                 {(product.discount_percentage || 0) > 0 && (
-                  <span className="px-4 py-2 rounded-full text-sm font-bold gradient-gold text-primary-foreground">
+                  <span className="px-4 py-2 rounded-full text-sm font-bold gradient-gold text-white shadow-lg">
                     -{product.discount_percentage}% OFF
                   </span>
                 )}

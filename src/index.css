@@ -264,3 +264,6 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--gold));
 }
+.text-secondary-foreground {
+    color: hsl(174.98deg 100% 52.63%);
+}
