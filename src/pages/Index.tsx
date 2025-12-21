@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/products/ProductCard";
 import { BannerCarousel } from "@/components/home/BannerCarousel";
 import { SpecialOfferPopup } from "@/components/SpecialOfferPopup";
-import { Crown, Sparkles, Truck, Shield, Gift, ChevronLeft, ChevronRight } from "lucide-react";
+import { Crown, Sparkles, Truck, Shield, Gift } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
 
 const iconMap: Record<string, React.ElementType> = {
   crown: Crown,
@@ -19,8 +18,6 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 export default function Index() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 8;
 
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ['featured-products'],
@@ -53,51 +50,9 @@ export default function Index() {
   const featuredProductsSection = sections?.find(s => s.section_type === 'featured_products');
   const ctaSection = sections?.find(s => s.section_type === 'cta');
 
-  // Pagination logic for featured products
-  const totalPages = products ? Math.ceil(products.length / productsPerPage) : 0;
-  const startIndex = (currentPage - 1) * productsPerPage;
-  const paginatedProducts = products?.slice(startIndex, startIndex + productsPerPage);
+  // Show only first 4 products
+  const featuredProducts = products?.slice(0, 4);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-    
-    return (
-      <div className="flex items-center justify-center gap-2 mt-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </Button>
-        
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-          <Button
-            key={page}
-            variant={currentPage === page ? "default" : "outline"}
-            size="sm"
-            onClick={() => handlePageChange(page)}
-          >
-            {page}
-          </Button>
-        ))}
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          <ChevronRight className="w-4 h-4" />
-        </Button>
-      </div>
-    );
-  };
 
   return (
     <Layout>
@@ -210,10 +165,9 @@ export default function Index() {
                 </div>
               ))}
             </div>
-          ) : paginatedProducts && paginatedProducts.length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {paginatedProducts.map((product, index) => (
+          ) : featuredProducts && featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {featuredProducts.map((product, index) => (
                   <ProductCard
                     key={product.id}
                     id={product.id}
@@ -227,10 +181,8 @@ export default function Index() {
                     stock_quantity={product.stock_quantity}
                     index={index}
                   />
-                ))}
-              </div>
-              {renderPagination()}
-            </>
+              ))}
+            </div>
           ) : (
             <div className="text-center py-16 bg-card rounded-xl border border-border/50">
               <Crown className="w-16 h-16 text-primary/30 mx-auto mb-4" />
