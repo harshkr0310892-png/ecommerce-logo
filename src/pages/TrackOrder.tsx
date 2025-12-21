@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Search, Crown, Package, Truck, CheckCircle, Clock, Loader2, XCircle, MessageCircle, FileText, Download, AlertCircle } from "lucide-react";
 import { cn, normalizeIndianMobile } from "@/lib/utils";
-import { AISupportChat } from "@/components/AISupportChat";
 
 import {
   Dialog,
@@ -716,9 +715,6 @@ export default function TrackOrder() {
 
         </div>
       </div>
-
-      {/* AI Support Chat */}
-      <AISupportChat />
     </Layout>
   );
 }
