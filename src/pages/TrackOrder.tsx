@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Search, Crown, Package, Truck, CheckCircle, Clock, Loader2, XCircle, MessageCircle, FileText, Download } from "lucide-react";
+import { Search, Crown, Package, Truck, CheckCircle, Clock, Loader2, XCircle, MessageCircle, FileText, Download, AlertCircle } from "lucide-react";
 import { cn, normalizeIndianMobile } from "@/lib/utils";
 import { AISupportChat } from "@/components/AISupportChat";
 
@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Order {
   id: string;
@@ -281,7 +282,7 @@ export default function TrackOrder() {
         <body>
           <div class="invoice">
             <div class="header">
-              <div class="logo">👑 Royal Store</div>
+              <div class="logo">kirana store</div>
               <div class="invoice-title">
                 <h1>INVOICE</h1>
                 <p>${order.order_id}</p>
@@ -339,7 +340,7 @@ export default function TrackOrder() {
             </div>
             
             <div class="footer">
-              <p>Thank you for shopping with Royal Store!</p>
+              <p>Thank you for shopping with Kirana Store!</p>
               <p style="margin-top: 5px;">For any queries, please contact our support team.</p>
             </div>
           </div>
@@ -450,6 +451,16 @@ export default function TrackOrder() {
             </p>
           </div>
 
+          {/* Return Policy Notice */}
+          <Alert className="mb-8 border-amber-200 bg-amber-50 text-amber-800">
+            <AlertCircle className="h-5 w-5" />
+            <AlertTitle className="font-semibold text-amber-900">Return Policy Notice</AlertTitle>
+            <AlertDescription className="text-amber-700">
+              If you wish to return your product, please download your invoice first as proof of purchase. 
+              You can download the invoice from the order details section below once you track your order.
+            </AlertDescription>
+          </Alert>
+
           {/* Search Type Selector */}
           <div className="mb-6">
             <Select value={searchType} onValueChange={(value: 'order-id' | 'phone') => setSearchType(value)}>
@@ -526,8 +537,26 @@ export default function TrackOrder() {
               <div className="bg-card rounded-xl border border-border/50 p-6 mb-8">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <p className="text-sm text-muted-foreground">Order ID</p>
-                    <p className="font-display text-xl font-bold text-primary">{order.order_id}</p>
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Order ID</p>
+                        <p className="font-display text-xl font-bold text-primary">{order.order_id}</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={generateInvoice}
+                        disabled={generatingInvoice}
+                        className="flex items-center gap-2"
+                      >
+                        {generatingInvoice ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <FileText className="w-4 h-4" />
+                        )}
+                        Invoice
+                      </Button>
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Order Date</p>

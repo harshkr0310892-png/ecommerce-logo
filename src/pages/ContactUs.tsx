@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { ContactForm } from "@/components/ContactForm";
-import { Crown } from "lucide-react";
+import { Crown, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ContactUs() {
   return (
@@ -16,6 +17,16 @@ export default function ContactUs() {
               Have questions or need assistance? Reach out to our team and we'll get back to you as soon as possible.
             </p>
           </div>
+
+          {/* Return Policy Notice */}
+          <Alert className="mb-8 border-amber-200 bg-amber-50 text-amber-800">
+            <AlertCircle className="h-5 w-5" />
+            <AlertTitle className="font-semibold text-amber-900">Return Policy Notice</AlertTitle>
+            <AlertDescription className="text-amber-700">
+              If you wish to return your product, please download your invoice first as proof of purchase. 
+              You can download the invoice from the order tracking page. Please have your invoice ready when contacting us about returns.
+            </AlertDescription>
+          </Alert>
 
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Contact Information */}
