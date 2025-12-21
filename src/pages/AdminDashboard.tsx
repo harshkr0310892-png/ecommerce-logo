@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { 
   Crown, LogOut, Plus, Package, ShoppingBag, Trash2, 
   Edit2, Loader2, RefreshCw, Upload, X, Ticket, Send, MessageCircle, Bell, Tag,
-  TrendingUp, BarChart3, Calendar, DollarSign, FolderOpen, ZoomIn
+  TrendingUp, BarChart3, Calendar, DollarSign, FolderOpen, ZoomIn, Phone
 } from "lucide-react";
 import { PhotoViewerModal } from "@/components/PhotoViewerModal";
 import { cn } from "@/lib/utils";
@@ -141,6 +141,27 @@ interface ContactSubmission {
   updated_at: string;
 }
 
+// Add interface for COD restrictions
+interface CodRestriction {
+  id: string;
+  phone_order_limit: number;
+  ip_daily_order_limit: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Add interface for individual phone restrictions
+interface IndividualPhoneRestriction {
+  id: string;
+  phone: string;
+  cod_daily_limit: number;
+  online_daily_limit: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 const MAX_IMAGES = 8;
 
 export default function AdminDashboard() {
@@ -230,6 +251,24 @@ export default function AdminDashboard() {
     phone: '',
     email: '',
     reason: '',
+    is_active: true,
+  });
+
+  // Add COD restrictions state variables
+  const [editingCodRestriction, setEditingCodRestriction] = useState<CodRestriction | null>(null);
+  const [codRestrictionForm, setCodRestrictionForm] = useState({
+    phone_order_limit: '10',
+    ip_daily_order_limit: '5',
+    is_active: true,
+  });
+
+  // Add individual phone restrictions state variables
+  const [individualPhoneRestrictions, setIndividualPhoneRestrictions] = useState<IndividualPhoneRestriction[]>([]);
+  const [editingIndividualPhoneRestriction, setEditingIndividualPhoneRestriction] = useState<IndividualPhoneRestriction | null>(null);
+  const [individualPhoneRestrictionForm, setIndividualPhoneRestrictionForm] = useState({
+    phone: '',
+    cod_daily_limit: '2',
+    online_daily_limit: '10',
     is_active: true,
   });
 
@@ -326,6 +365,32 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data as ContactSubmission[];
+    },
+  });
+
+  // Add fetch COD restrictions query
+  const { data: codRestrictions, isLoading: codRestrictionsLoading, refetch: refetchCodRestrictions } = useQuery({
+    queryKey: ['admin-cod-restrictions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('cod_restrictions')
+        .select('*')
+        .limit(1);
+      if (error) throw error;
+      return data as CodRestriction[];
+    },
+  });
+
+  // Add fetch individual phone restrictions query
+  const { data: individualPhoneRestrictionsData, isLoading: individualPhoneRestrictionsLoading, refetch: refetchIndividualPhoneRestrictions } = useQuery({
+    queryKey: ['admin-individual-phone-restrictions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('individual_phone_restrictions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as IndividualPhoneRestriction[];
     },
   });
 
@@ -819,6 +884,124 @@ export default function AdminDashboard() {
     },
   });
 
+  // Add delete mutation for individual phone restrictions
+  const deleteIndividualPhoneRestrictionMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('individual_phone_restrictions')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-individual-phone-restrictions'] });
+      toast.success('Individual phone restriction removed successfully');
+    },
+    onError: (error) => {
+      console.error('Error removing individual phone restriction:', error);
+      toast.error('Failed to remove individual phone restriction');
+    },
+  });
+
+  // Add COD restrictions mutation
+  const codRestrictionMutation = useMutation({
+    mutationFn: async (codRestrictionData: any) => {
+      const data = {
+        phone_order_limit: parseInt(codRestrictionData.phone_order_limit) || 10,
+        ip_daily_order_limit: parseInt(codRestrictionData.ip_daily_order_limit) || 5,
+        is_active: codRestrictionData.is_active,
+      };
+
+      // Since there should only be one COD restriction record, we'll update the existing one or insert a new one
+      const { data: existingData, error: fetchError } = await supabase
+        .from('cod_restrictions')
+        .select('id')
+        .limit(1);
+
+      if (fetchError) throw fetchError;
+
+      let result;
+      if (existingData && existingData.length > 0) {
+        // Update existing record
+        const { data: updatedData, error } = await supabase
+          .from('cod_restrictions')
+          .update(data)
+          .eq('id', existingData[0].id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        result = updatedData;
+      } else {
+        // Insert new record
+        const { data: insertedData, error } = await supabase
+          .from('cod_restrictions')
+          .insert(data)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        result = insertedData;
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-cod-restrictions'] });
+      toast.success('COD restrictions updated successfully');
+    },
+    onError: (error: any) => {
+      console.error('Error saving COD restrictions:', error);
+      toast.error(`Failed to save COD restrictions: ${error.message}`);
+    },
+  });
+
+  // Add individual phone restrictions mutation
+  const individualPhoneRestrictionMutation = useMutation({
+    mutationFn: async (individualPhoneRestrictionData: any) => {
+      const data = {
+        phone: individualPhoneRestrictionData.phone,
+        cod_daily_limit: parseInt(individualPhoneRestrictionData.cod_daily_limit) || 2,
+        online_daily_limit: parseInt(individualPhoneRestrictionData.online_daily_limit) || 10,
+        is_active: individualPhoneRestrictionData.is_active,
+      };
+
+      let result;
+      if (individualPhoneRestrictionData.id) {
+        // Update existing record
+        const { data: updatedData, error } = await supabase
+          .from('individual_phone_restrictions')
+          .update(data)
+          .eq('id', individualPhoneRestrictionData.id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        result = updatedData;
+      } else {
+        // Insert new record
+        const { data: insertedData, error } = await supabase
+          .from('individual_phone_restrictions')
+          .insert(data)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        result = insertedData;
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-individual-phone-restrictions'] });
+      toast.success('Individual phone restriction saved successfully');
+    },
+    onError: (error: any) => {
+      console.error('Error saving individual phone restriction:', error);
+      toast.error(`Failed to save individual phone restriction: ${error.message}`);
+    },
+  });
+
   // Update order status mutation
   const updateOrderMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
@@ -1000,11 +1183,62 @@ export default function AdminDashboard() {
     setBannedUserDialogOpen(true);
   };
 
+  // Add handler function for individual phone restrictions
+  const handleEditIndividualPhoneRestriction = (restriction: IndividualPhoneRestriction) => {
+    setEditingIndividualPhoneRestriction(restriction);
+    setIndividualPhoneRestrictionForm({
+      phone: restriction.phone || '',
+      cod_daily_limit: restriction.cod_daily_limit.toString(),
+      online_daily_limit: restriction.online_daily_limit.toString(),
+      is_active: restriction.is_active,
+    });
+  };
+
   // Add reset function for banned users
   const resetBannedUserForm = () => {
     setBannedUserForm({ phone: '', email: '', reason: '', is_active: true });
     setEditingBannedUser(null);
   };
+
+  // Add reset function for COD restrictions
+  const resetCodRestrictionForm = () => {
+    setCodRestrictionForm({ 
+      phone_order_limit: '10', 
+      ip_daily_order_limit: '5', 
+      is_active: true 
+    });
+    setEditingCodRestriction(null);
+  };
+
+  // Add reset function for individual phone restrictions
+  const resetIndividualPhoneRestrictionForm = () => {
+    setIndividualPhoneRestrictionForm({ 
+      phone: '', 
+      cod_daily_limit: '2', 
+      online_daily_limit: '10', 
+      is_active: true 
+    });
+    setEditingIndividualPhoneRestriction(null);
+  };
+
+  // Initialize COD restriction form with actual values
+  useEffect(() => {
+    if (codRestrictions && codRestrictions.length > 0) {
+      const restriction = codRestrictions[0];
+      setCodRestrictionForm({
+        phone_order_limit: restriction.phone_order_limit.toString(),
+        ip_daily_order_limit: restriction.ip_daily_order_limit.toString(),
+        is_active: restriction.is_active,
+      });
+    }
+  }, [codRestrictions]);
+
+  // Update individual phone restrictions state when data is fetched
+  useEffect(() => {
+    if (individualPhoneRestrictionsData) {
+      setIndividualPhoneRestrictions(individualPhoneRestrictionsData);
+    }
+  }, [individualPhoneRestrictionsData]);
 
   // Handle form submissions
   const handleSubmitCategory = (e: React.FormEvent) => {
@@ -1079,6 +1313,74 @@ export default function AdminDashboard() {
       id: editingBannedUser?.id,
       // Only include banned_by if user is authenticated
       ...(user?.id && { banned_by: user.id }),
+    });
+  };
+
+  // Add submit handler for COD restrictions
+  const handleSubmitCodRestriction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate inputs
+    const phoneLimit = parseInt(codRestrictionForm.phone_order_limit);
+    const ipLimit = parseInt(codRestrictionForm.ip_daily_order_limit);
+    
+    if (isNaN(phoneLimit) || phoneLimit <= 0) {
+      toast.error('Please enter a valid phone order limit');
+      return;
+    }
+    
+    if (isNaN(ipLimit) || ipLimit <= 0) {
+      toast.error('Please enter a valid IP daily order limit');
+      return;
+    }
+    
+    codRestrictionMutation.mutate({
+      ...codRestrictionForm,
+    });
+  };
+
+  // Add submit handler for individual phone restrictions
+  const handleSubmitIndividualPhoneRestriction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate inputs
+    if (!individualPhoneRestrictionForm.phone.trim()) {
+      toast.error('Please enter a phone number');
+      return;
+    }
+    
+    const codLimit = parseInt(individualPhoneRestrictionForm.cod_daily_limit);
+    const onlineLimit = parseInt(individualPhoneRestrictionForm.online_daily_limit);
+    
+    if (isNaN(codLimit) || codLimit < 0) {
+      toast.error('Please enter a valid COD daily limit');
+      return;
+    }
+    
+    if (isNaN(onlineLimit) || onlineLimit < 0) {
+      toast.error('Please enter a valid online payment daily limit');
+      return;
+    }
+    
+    // Normalize phone number
+    let normalizedPhone = individualPhoneRestrictionForm.phone.trim();
+    // Remove any non-digit characters
+    const digitsOnly = normalizedPhone.replace(/\D/g, '');
+    if (digitsOnly.length === 10) {
+      normalizedPhone = `+91${digitsOnly}`;
+    } else if (digitsOnly.length === 12 && digitsOnly.startsWith('91')) {
+      normalizedPhone = `+${digitsOnly}`;
+    } else if (digitsOnly.length === 13 && digitsOnly.startsWith('91')) {
+      normalizedPhone = `+${digitsOnly}`;
+    } else {
+      toast.error('Please enter a valid 10-digit Indian mobile number');
+      return;
+    }
+    
+    individualPhoneRestrictionMutation.mutate({
+      ...individualPhoneRestrictionForm,
+      phone: normalizedPhone,
+      id: editingIndividualPhoneRestriction?.id,
     });
   };
 
@@ -1165,6 +1467,14 @@ export default function AdminDashboard() {
               <TabsTrigger value="contacts" className="flex items-center gap-2 whitespace-nowrap">
                 <MessageCircle className="w-4 h-4" />
                 Contact Submissions
+              </TabsTrigger>
+              <TabsTrigger value="cod-restrictions" className="flex items-center gap-2 whitespace-nowrap">
+                <DollarSign className="w-4 h-4" />
+                COD Restrictions
+              </TabsTrigger>
+              <TabsTrigger value="individual-phone-restrictions" className="flex items-center gap-2 whitespace-nowrap">
+                <Phone className="w-4 h-4" />
+                Individual Phone Limits
               </TabsTrigger>
             </TabsList>
           </div>
@@ -2644,6 +2954,241 @@ export default function AdminDashboard() {
                 <p className="text-muted-foreground">No categories yet. Create your first category!</p>
               </div>
             )}
+          </TabsContent>
+
+          {/* COD Restrictions Tab */}
+          <TabsContent value="cod-restrictions" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-2xl font-bold">COD Restrictions</h2>
+              <Button variant="ghost" size="icon" onClick={() => refetchCodRestrictions()}>
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {codRestrictionsLoading ? (
+              <div className="text-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+              </div>
+            ) : (
+              <div className="bg-card rounded-xl border border-border/50 p-6 max-w-2xl">
+                <form onSubmit={handleSubmitCodRestriction} className="space-y-6">
+                  <div>
+                    <h3 className="font-display text-lg font-semibold mb-4">Order Limits</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="phone_order_limit">Max Orders Per Phone Number</Label>
+                        <Input
+                          id="phone_order_limit"
+                          type="number"
+                          min="1"
+                          value={codRestrictionForm.phone_order_limit}
+                          onChange={(e) => setCodRestrictionForm({ ...codRestrictionForm, phone_order_limit: e.target.value })}
+                          className="mt-1"
+                          placeholder="10"
+                        />
+                        <p className="text-sm text-muted-foreground mt-1">Maximum number of COD orders allowed per phone number</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="ip_daily_order_limit">Max Daily Orders Per IP</Label>
+                        <Input
+                          id="ip_daily_order_limit"
+                          type="number"
+                          min="1"
+                          value={codRestrictionForm.ip_daily_order_limit}
+                          onChange={(e) => setCodRestrictionForm({ ...codRestrictionForm, ip_daily_order_limit: e.target.value })}
+                          className="mt-1"
+                          placeholder="5"
+                        />
+                        <p className="text-sm text-muted-foreground mt-1">Maximum number of COD orders allowed per IP address per day</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-4">
+                    <Switch 
+                      id="cod_active"
+                      checked={codRestrictionForm.is_active} 
+                      onCheckedChange={(checked) => setCodRestrictionForm({ ...codRestrictionForm, is_active: checked })} 
+                    />
+                    <Label htmlFor="cod_active">Enable COD Restrictions</Label>
+                  </div>
+
+                  <div className="pt-4">
+                    <Button
+                      type="submit"
+                      variant="royal"
+                      className="w-full sm:w-auto"
+                      disabled={codRestrictionMutation.isPending}
+                    >
+                      {codRestrictionMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : null}
+                      Save Restrictions
+                    </Button>
+                  </div>
+
+                  <div className="pt-4 text-sm text-muted-foreground border-t border-border/50">
+                    <p><strong>Note:</strong> These restrictions only apply to Cash on Delivery (COD) orders.</p>
+                    <p className="mt-1">Current settings: {codRestrictions && codRestrictions.length > 0 ? 
+                      `${codRestrictions[0].phone_order_limit} orders per phone, ${codRestrictions[0].ip_daily_order_limit} orders per IP daily` : 
+                      'Loading...'
+                    }</p>
+                  </div>
+                </form>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Individual Phone Restrictions Tab */}
+          <TabsContent value="individual-phone-restrictions" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-2xl font-bold">Individual Phone Limits</h2>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="icon" onClick={() => refetchIndividualPhoneRestrictions()}>
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Form Section */}
+              <div className="lg:col-span-1">
+                <div className="bg-card rounded-xl border border-border/50 p-6">
+                  <h3 className="font-display text-lg font-semibold mb-4">
+                    {editingIndividualPhoneRestriction ? 'Edit Phone Limit' : 'Add Phone Limit'}
+                  </h3>
+                  <form onSubmit={handleSubmitIndividualPhoneRestriction} className="space-y-4">
+                    <div>
+                      <Label htmlFor="individual_phone">Phone Number *</Label>
+                      <Input
+                        id="individual_phone"
+                        value={individualPhoneRestrictionForm.phone}
+                        onChange={(e) => setIndividualPhoneRestrictionForm({ ...individualPhoneRestrictionForm, phone: e.target.value })}
+                        className="mt-1"
+                        placeholder="e.g., 8757226562"
+                      />
+                      <p className="text-sm text-muted-foreground mt-1">Enter a 10-digit Indian mobile number</p>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="cod_daily_limit">Daily COD Limit *</Label>
+                      <Input
+                        id="cod_daily_limit"
+                        type="number"
+                        min="0"
+                        value={individualPhoneRestrictionForm.cod_daily_limit}
+                        onChange={(e) => setIndividualPhoneRestrictionForm({ ...individualPhoneRestrictionForm, cod_daily_limit: e.target.value })}
+                        className="mt-1"
+                        placeholder="2"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="online_daily_limit">Daily Online Payment Limit *</Label>
+                      <Input
+                        id="online_daily_limit"
+                        type="number"
+                        min="0"
+                        value={individualPhoneRestrictionForm.online_daily_limit}
+                        onChange={(e) => setIndividualPhoneRestrictionForm({ ...individualPhoneRestrictionForm, online_daily_limit: e.target.value })}
+                        className="mt-1"
+                        placeholder="10"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center gap-3 pt-2">
+                      <Switch 
+                        id="individual_phone_active"
+                        checked={individualPhoneRestrictionForm.is_active} 
+                        onCheckedChange={(checked) => setIndividualPhoneRestrictionForm({ ...individualPhoneRestrictionForm, is_active: checked })} 
+                      />
+                      <Label htmlFor="individual_phone_active">Active</Label>
+                    </div>
+                    
+                    <div className="flex gap-2 pt-4">
+                      <Button
+                        type="submit"
+                        variant="royal"
+                        className="flex-1"
+                        disabled={individualPhoneRestrictionMutation.isPending}
+                      >
+                        {individualPhoneRestrictionMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : null}
+                        {editingIndividualPhoneRestriction ? 'Update' : 'Add'}
+                      </Button>
+                      {editingIndividualPhoneRestriction && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={resetIndividualPhoneRestrictionForm}
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              </div>
+              
+              {/* List Section */}
+              <div className="lg:col-span-2">
+                {individualPhoneRestrictionsLoading ? (
+                  <div className="text-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                  </div>
+                ) : individualPhoneRestrictions && individualPhoneRestrictions.length > 0 ? (
+                  <div className="space-y-3">
+                    {individualPhoneRestrictions.map((restriction) => (
+                      <div
+                        key={restriction.id}
+                        className="flex items-center justify-between p-4 bg-card rounded-xl border border-border/50"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-display font-medium">{restriction.phone}</h3>
+                            <span className={cn(
+                              "text-xs px-2 py-0.5 rounded-full",
+                              restriction.is_active
+                                ? "bg-green-500/10 text-green-600"
+                                : "bg-muted text-muted-foreground"
+                            )}>
+                              {restriction.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
+                            <span>COD: {restriction.cod_daily_limit}/day</span>
+                            <span>Online: {restriction.online_daily_limit}/day</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditIndividualPhoneRestriction(restriction)}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => deleteIndividualPhoneRestrictionMutation.mutate(restriction.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-card rounded-xl border border-border/50">
+                    <Phone className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                    <p className="text-muted-foreground">No individual phone restrictions yet.</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </main>

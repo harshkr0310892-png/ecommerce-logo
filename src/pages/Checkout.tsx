@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,18 @@ function generateOrderId(): string {
   return result;
 }
 
+async function getClientIP(): Promise<string> {
+  try {
+    // Try multiple services to get IP address
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip || '';
+  } catch (error) {
+    console.error('Error getting client IP:', error);
+    return '';
+  }
+}
+
 interface AppliedCoupon {
   code: string;
   discount_type: string;
@@ -40,6 +52,7 @@ export default function Checkout() {
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [agreePolicies, setAgreePolicies] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'online' | 'cod'>('online');
+    const [clientIP, setClientIP] = useState<string>('');
   
   const [formData, setFormData] = useState({
     name: '',
@@ -49,6 +62,15 @@ export default function Checkout() {
   });
 
   const subtotal = getDiscountedTotal();
+    
+    // Get client IP on component mount
+    React.useEffect(() => {
+      const fetchIP = async () => {
+        const ip = await getClientIP();
+        setClientIP(ip);
+      };
+      fetchIP();
+    }, []);
   
   // Calculate coupon discount
   const calculateCouponDiscount = () => {
@@ -212,6 +234,114 @@ export default function Checkout() {
       return;
     }
 
+    // Check individual phone restrictions first
+    try {
+      const formattedPhone = `+91${normalizedPhone}`;
+      
+      // Check for individual phone restrictions
+      const { data: individualRestrictions, error: individualError } = await supabase
+        .from('individual_phone_restrictions')
+        .select('*')
+        .eq('phone', formattedPhone)
+        .eq('is_active', true)
+        .maybeSingle();
+      
+      if (individualError) throw individualError;
+      
+      // If individual restrictions exist, check them
+      if (individualRestrictions) {
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Check payment method specific limits
+        if (paymentMethod === 'cod') {
+          // Check individual COD limit
+          const { data: codOrderCounts, error: codCountError } = await supabase
+            .from('individual_phone_order_counts')
+            .select('order_count')
+            .eq('phone', formattedPhone)
+            .eq('payment_method', 'cod')
+            .eq('last_order_date', today)
+            .maybeSingle();
+          
+          if (codCountError) throw codCountError;
+          
+          const currentCount = codOrderCounts?.order_count || 0;
+          if (currentCount >= individualRestrictions.cod_daily_limit) {
+            toast.error(`You have reached your daily limit of ${individualRestrictions.cod_daily_limit} COD orders.`);
+            return;
+          }
+        } else if (paymentMethod === 'online') {
+          // Check individual online payment limit
+          const { data: onlineOrderCounts, error: onlineCountError } = await supabase
+            .from('individual_phone_order_counts')
+            .select('order_count')
+            .eq('phone', formattedPhone)
+            .eq('payment_method', 'online')
+            .eq('last_order_date', today)
+            .maybeSingle();
+          
+          if (onlineCountError) throw onlineCountError;
+          
+          const currentCount = onlineOrderCounts?.order_count || 0;
+          if (currentCount >= individualRestrictions.online_daily_limit) {
+            toast.error(`You have reached your daily limit of ${individualRestrictions.online_daily_limit} online payment orders.`);
+            return;
+          }
+        }
+      } else {
+        // Check global COD restrictions if no individual restrictions exist and payment method is COD
+        if (paymentMethod === 'cod') {
+          const { data: codRestrictions, error: restrictionsError } = await supabase
+            .from('cod_restrictions')
+            .select('*')
+            .limit(1);
+
+          if (restrictionsError) throw restrictionsError;
+
+          // If restrictions are enabled, check limits
+          if (codRestrictions && codRestrictions.length > 0 && codRestrictions[0].is_active) {
+            const restriction = codRestrictions[0];
+            
+            // Check phone number order limit
+            const { data: phoneOrderCounts, error: phoneCountError } = await supabase
+              .from('phone_order_counts')
+              .select('order_count')
+              .eq('phone', formattedPhone);
+            
+            if (phoneCountError) throw phoneCountError;
+            
+            if (phoneOrderCounts && phoneOrderCounts.length > 0 && 
+                phoneOrderCounts[0].order_count >= restriction.phone_order_limit) {
+              toast.error(`You have reached the maximum limit of ${restriction.phone_order_limit} COD orders with this phone number.`);
+              return;
+            }
+            
+            // Check IP address daily order limit
+            if (clientIP) {
+              const today = new Date().toISOString().split('T')[0];
+              const { data: ipOrderCounts, error: ipCountError } = await supabase
+                .from('ip_order_counts')
+                .select('order_count')
+                .eq('ip_address', clientIP)
+                .eq('last_order_date', today);
+              
+              if (ipCountError) throw ipCountError;
+              
+              if (ipOrderCounts && ipOrderCounts.length > 0 && 
+                  ipOrderCounts[0].order_count >= restriction.ip_daily_order_limit) {
+                toast.error(`You have reached the maximum limit of ${restriction.ip_daily_order_limit} COD orders from this IP address today.`);
+                return;
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking individual phone restrictions:', error);
+      // Don't block the order if there's an error checking restrictions
+      // This ensures customers can still place orders even if our restriction system has issues
+    }
+
     setIsLoading(true);
 
     try {
@@ -234,6 +364,122 @@ export default function Checkout() {
         .single();
 
       if (orderError) throw orderError;
+
+      // Update order counts based on individual or global restrictions
+      try {
+        const formattedPhone = `+91${normalizedPhone}`;
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Check for individual phone restrictions
+        const { data: individualRestrictions, error: individualError } = await supabase
+          .from('individual_phone_restrictions')
+          .select('*')
+          .eq('phone', formattedPhone)
+          .eq('is_active', true)
+          .maybeSingle();
+        
+        if (individualError) {
+          console.error('Error checking individual phone restrictions:', individualError);
+        }
+        
+        if (individualRestrictions) {
+          // Update individual phone order count
+          const { data: individualCountData, error: individualCountError } = await supabase
+            .from('individual_phone_order_counts')
+            .select('*')
+            .eq('phone', formattedPhone)
+            .eq('payment_method', paymentMethod)
+            .eq('last_order_date', today)
+            .maybeSingle();
+          
+          if (individualCountError) {
+            console.error('Error checking individual phone order count:', individualCountError);
+          } else if (individualCountData) {
+            // Update existing record
+            await supabase
+              .from('individual_phone_order_counts')
+              .update({ 
+                order_count: individualCountData.order_count + 1,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', individualCountData.id);
+          } else {
+            // Insert new record
+            await supabase
+              .from('individual_phone_order_counts')
+              .insert({
+                phone: formattedPhone,
+                payment_method: paymentMethod,
+                order_count: 1,
+                last_order_date: today
+              });
+          }
+        } else if (paymentMethod === 'cod') {
+          // Update global phone order count for COD orders
+          const { data: phoneCountData, error: phoneCountError } = await supabase
+            .from('phone_order_counts')
+            .select('*')
+            .eq('phone', formattedPhone)
+            .maybeSingle();
+          
+          if (phoneCountError) {
+            console.error('Error checking phone order count:', phoneCountError);
+          } else if (phoneCountData) {
+            // Update existing record
+            await supabase
+              .from('phone_order_counts')
+              .update({ 
+                order_count: phoneCountData.order_count + 1,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', phoneCountData.id);
+          } else {
+            // Insert new record
+            await supabase
+              .from('phone_order_counts')
+              .insert({
+                phone: formattedPhone,
+                order_count: 1,
+                last_order_date: today
+              });
+          }
+          
+          // Update IP order count
+          if (clientIP) {
+            const { data: ipCountData, error: ipCountError } = await supabase
+              .from('ip_order_counts')
+              .select('*')
+              .eq('ip_address', clientIP)
+              .eq('last_order_date', today)
+              .maybeSingle();
+            
+            if (ipCountError) {
+              console.error('Error checking IP order count:', ipCountError);
+            } else if (ipCountData) {
+              // Update existing record
+              await supabase
+                .from('ip_order_counts')
+                .update({ 
+                  order_count: ipCountData.order_count + 1,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', ipCountData.id);
+            } else {
+              // Insert new record
+              await supabase
+                .from('ip_order_counts')
+                .insert({
+                  ip_address: clientIP,
+                  order_count: 1,
+                  last_order_date: today
+                });
+            }
+          }
+        }
+      } catch (countError) {
+        console.error('Error updating order counts:', countError);
+        // Don't block the order if there's an error updating counts
+      }
 
       // Create order items
       const orderItems = items.map((item) => ({
