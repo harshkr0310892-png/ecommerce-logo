@@ -263,7 +263,11 @@ export default function AdminDashboard() {
   const [codRestrictionForm, setCodRestrictionForm] = useState({
     phone_order_limit: '10',
     ip_daily_order_limit: '5',
+    online_phone_order_limit: '10',
+    online_ip_daily_order_limit: '5',
     is_active: true,
+    cod_restrictions_enabled: true,
+    online_restrictions_enabled: true,
   });
 
   // Add individual phone restrictions state variables

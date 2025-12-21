@@ -271,6 +271,7 @@ export type Database = {
           status: string
           total: number
           updated_at: string
+          payment_method: string | null
         }
         Insert: {
           created_at?: string
@@ -283,6 +284,7 @@ export type Database = {
           status?: string
           total: number
           updated_at?: string
+          payment_method?: string | null
         }
         Update: {
           created_at?: string
@@ -295,6 +297,7 @@ export type Database = {
           status?: string
           total?: number
           updated_at?: string
+          payment_method?: string | null
         }
         Relationships: []
       }
@@ -486,6 +489,7 @@ export type Database = {
           features: Json | null
           detailed_description: string | null
           dimensions: string | null
+          cash_on_delivery: boolean | null
         }
         Insert: {
           category_id?: string | null
@@ -504,6 +508,7 @@ export type Database = {
           features?: Json | null
           detailed_description?: string | null
           dimensions?: string | null
+          cash_on_delivery?: boolean | null
         }
         Update: {
           category_id?: string | null
@@ -522,6 +527,7 @@ export type Database = {
           features?: Json | null
           detailed_description?: string | null
           dimensions?: string | null
+          cash_on_delivery?: boolean | null
         }
         Relationships: [
           {
@@ -628,6 +634,220 @@ export type Database = {
           subject?: string
           description?: string
           is_banned?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // Add COD restrictions table definition
+      cod_restrictions: {
+        Row: {
+          id: string
+          phone_order_limit: number
+          ip_daily_order_limit: number
+          online_phone_order_limit: number
+          online_ip_daily_order_limit: number
+          is_active: boolean
+          cod_restrictions_enabled: boolean
+          online_restrictions_enabled: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          phone_order_limit?: number
+          ip_daily_order_limit?: number
+          online_phone_order_limit?: number
+          online_ip_daily_order_limit?: number
+          is_active?: boolean
+          cod_restrictions_enabled?: boolean
+          online_restrictions_enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          phone_order_limit?: number
+          ip_daily_order_limit?: number
+          online_phone_order_limit?: number
+          online_ip_daily_order_limit?: number
+          is_active?: boolean
+          cod_restrictions_enabled?: boolean
+          online_restrictions_enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // Add phone order counts table definition
+      phone_order_counts: {
+        Row: {
+          id: string
+          phone: string
+          order_count: number
+          last_order_date: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          phone: string
+          order_count?: number
+          last_order_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          phone?: string
+          order_count?: number
+          last_order_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // Add IP order counts table definition
+      ip_order_counts: {
+        Row: {
+          id: string
+          ip_address: string
+          order_count: number
+          last_order_date: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          ip_address: string
+          order_count?: number
+          last_order_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          ip_address?: string
+          order_count?: number
+          last_order_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // Add online phone order counts table definition
+      online_phone_order_counts: {
+        Row: {
+          id: string
+          phone: string
+          order_count: number
+          last_order_date: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          phone: string
+          order_count?: number
+          last_order_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          phone?: string
+          order_count?: number
+          last_order_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // Add online IP order counts table definition
+      online_ip_order_counts: {
+        Row: {
+          id: string
+          ip_address: string
+          order_count: number
+          last_order_date: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          ip_address: string
+          order_count?: number
+          last_order_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          ip_address?: string
+          order_count?: number
+          last_order_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // Add individual phone restrictions table definition
+      individual_phone_restrictions: {
+        Row: {
+          id: string
+          phone: string
+          cod_daily_limit: number
+          online_daily_limit: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          phone: string
+          cod_daily_limit?: number
+          online_daily_limit?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          phone?: string
+          cod_daily_limit?: number
+          online_daily_limit?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // Add individual phone order counts table definition
+      individual_phone_order_counts: {
+        Row: {
+          id: string
+          phone: string
+          payment_method: string
+          order_count: number
+          last_order_date: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          phone: string
+          payment_method: string
+          order_count?: number
+          last_order_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          phone?: string
+          payment_method?: string
+          order_count?: number
+          last_order_date?: string
           created_at?: string
           updated_at?: string
         }
