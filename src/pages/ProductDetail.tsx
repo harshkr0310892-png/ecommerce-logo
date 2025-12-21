@@ -68,6 +68,21 @@ export default function ProductDetail() {
     enabled: !!id,
   });
 
+  // Check if product has variants
+  const { data: productVariants } = useQuery({
+    queryKey: ['product-variants-count', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('product_variants')
+        .select('id')
+        .eq('product_id', id);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
   // Parse features from product data
   const productFeatures = product?.features 
     ? Array.isArray(product.features) 
@@ -98,6 +113,12 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!product) return;
+    
+    // Check if product has variants but no variant is selected
+    if (productVariants && productVariants.length > 0 && !selectedVariant) {
+      toast.error('Please select product attributes (size, color, etc.) before adding to cart');
+      return;
+    }
     
     const displayImage = (product.images && product.images.length > 0) ? product.images[0] : product.image_url;
     const finalPrice = selectedVariant ? selectedVariant.price : Number(product.price);
@@ -705,7 +726,7 @@ export default function ProductDetail() {
               <Button
                 variant="royal"
                 size="xl"
-                className="flex-1 h-16 px-4"
+                className="flex-1 h-24 sm:h-16 px-4"
                 onClick={handleAddToCart}
                 disabled={isSoldOut}
               >
@@ -715,7 +736,7 @@ export default function ProductDetail() {
               <Button
                 variant={isWishlisted ? "default" : "outline"}
                 size="xl"
-                className="flex-1 h-16 px-4 hover:bg-gradient-to-r hover:from-blue-500/20 hover:to-light-blue-500/20 hover:border-blue-500/50 transition-all duration-300"
+                className="flex-1 h-24 sm:h-16 px-4 hover:bg-gradient-to-r hover:from-blue-500/20 hover:to-light-blue-500/20 hover:border-blue-500/50 transition-all duration-300"
                 onClick={handleToggleWishlist}
               >
                 <Heart className={cn("w-5 h-5 mr-2", isWishlisted && "fill-current animate-pulse")} />
