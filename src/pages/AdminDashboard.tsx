@@ -88,6 +88,7 @@ interface Order {
   customer_address: string;
   customer_email: string | null;
   status: string;
+  payment_method: 'online' | 'cod';
   total: number;
   created_at: string;
   updated_at: string;
@@ -1604,11 +1605,21 @@ export default function AdminDashboard() {
                           <p className="font-display text-xl font-bold text-black">
                             {order.order_id}
                           </p>
-                          {order.status === 'cancelled' && (
-                            <span className="text-xs px-2 py-0.5 bg-destructive/10 text-destructive rounded-full">
-                              Cancelled
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className={cn(
+                              "text-xs px-2 py-0.5 rounded-full",
+                              order.payment_method === 'online' 
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                            )}>
+                              {order.payment_method === 'online' ? 'Online Payment' : 'Cash on Delivery'}
                             </span>
-                          )}
+                            {order.status === 'cancelled' && (
+                              <span className="text-xs px-2 py-0.5 bg-destructive/10 text-destructive rounded-full">
+                                Cancelled
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-muted-foreground">Total</p>
