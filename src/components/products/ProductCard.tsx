@@ -112,6 +112,20 @@ export function ProductCard({
       removeFromWishlist(id);
       toast.success(`${name} removed from wishlist`);
     } else {
+      // If still loading variant info, show loading state
+      if (variantsLoading) {
+        toast.info('Checking product details...');
+        return;
+      }
+      
+      // If product has variants, redirect to product page to select them
+      if (hasVariants) {
+        toast.info('Please select options before adding to wishlist');
+        navigate(`/product/${id}`);
+        return;
+      }
+      
+      // If no variants, add directly to wishlist
       addToWishlist({
         id,
         name,
