@@ -144,6 +144,12 @@ export default function ProductDetail() {
   const handleToggleWishlist = () => {
     if (!product) return;
     
+    // Check if product has variants but no variant is selected (only when adding to wishlist)
+    if (productVariants && productVariants.length > 0 && !selectedVariant && !isWishlisted) {
+      toast.error('Please select product attributes (size, color, etc.) before adding to wishlist');
+      return;
+    }
+    
     const displayImage = (product.images && product.images.length > 0) ? product.images[0] : product.image_url;
     const finalPrice = selectedVariant ? selectedVariant.price : Number(product.price);
     
