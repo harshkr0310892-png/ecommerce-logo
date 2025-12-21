@@ -289,20 +289,20 @@ export default function Checkout() {
           }
         }
       } else {
-        // Check global COD restrictions if no individual restrictions exist and payment method is COD
-        if (paymentMethod === 'cod') {
-          const { data: codRestrictions, error: restrictionsError } = await supabase
-            .from('cod_restrictions')
-            .select('*')
-            .limit(1);
+        // Check global restrictions if no individual restrictions exist
+        const { data: codRestrictions, error: restrictionsError } = await supabase
+          .from('cod_restrictions')
+          .select('*')
+          .limit(1);
 
-          if (restrictionsError) throw restrictionsError;
+        if (restrictionsError) throw restrictionsError;
 
-          // If restrictions are enabled, check limits
-          if (codRestrictions && codRestrictions.length > 0 && codRestrictions[0].is_active) {
-            const restriction = codRestrictions[0];
-            
-            // Check phone number order limit
+        // If restrictions are enabled, check limits
+        if (codRestrictions && codRestrictions.length > 0) {
+          const restriction = codRestrictions[0];
+          
+          if (paymentMethod === 'cod' && restriction.cod_restrictions_enabled) {
+            // Check phone number order limit for COD
             const { data: phoneOrderCounts, error: phoneCountError } = await supabase
               .from('phone_order_counts')
               .select('order_count')
@@ -316,7 +316,7 @@ export default function Checkout() {
               return;
             }
             
-            // Check IP address daily order limit
+            // Check IP address daily order limit for COD
             if (clientIP) {
               const today = new Date().toISOString().split('T')[0];
               const { data: ipOrderCounts, error: ipCountError } = await supabase
@@ -330,6 +330,38 @@ export default function Checkout() {
               if (ipOrderCounts && ipOrderCounts.length > 0 && 
                   ipOrderCounts[0].order_count >= restriction.ip_daily_order_limit) {
                 toast.error(`You have reached the maximum limit of ${restriction.ip_daily_order_limit} COD orders from this IP address today.`);
+                return;
+              }
+            }
+          } else if (paymentMethod === 'online' && restriction.online_restrictions_enabled) {
+            // Check phone number order limit for online payment
+            const { data: onlinePhoneOrderCounts, error: onlinePhoneCountError } = await supabase
+              .from('online_phone_order_counts')
+              .select('order_count')
+              .eq('phone', formattedPhone);
+            
+            if (onlinePhoneCountError) throw onlinePhoneCountError;
+            
+            if (onlinePhoneOrderCounts && onlinePhoneOrderCounts.length > 0 && 
+                onlinePhoneOrderCounts[0].order_count >= restriction.online_phone_order_limit) {
+              toast.error(`You have reached the maximum limit of ${restriction.online_phone_order_limit} online payment orders with this phone number.`);
+              return;
+            }
+            
+            // Check IP address daily order limit for online payment
+            if (clientIP) {
+              const today = new Date().toISOString().split('T')[0];
+              const { data: onlineIpOrderCounts, error: onlineIpCountError } = await supabase
+                .from('online_ip_order_counts')
+                .select('order_count')
+                .eq('ip_address', clientIP)
+                .eq('last_order_date', today);
+              
+              if (onlineIpCountError) throw onlineIpCountError;
+              
+              if (onlineIpOrderCounts && onlineIpOrderCounts.length > 0 && 
+                  onlineIpOrderCounts[0].order_count >= restriction.online_ip_daily_order_limit) {
+                toast.error(`You have reached the maximum limit of ${restriction.online_ip_daily_order_limit} online payment orders from this IP address today.`);
                 return;
               }
             }
@@ -414,65 +446,129 @@ export default function Checkout() {
                 last_order_date: today
               });
           }
-        } else if (paymentMethod === 'cod') {
-          // Update global phone order count for COD orders
-          const { data: phoneCountData, error: phoneCountError } = await supabase
-            .from('phone_order_counts')
-            .select('*')
-            .eq('phone', formattedPhone)
-            .maybeSingle();
-          
-          if (phoneCountError) {
-            console.error('Error checking phone order count:', phoneCountError);
-          } else if (phoneCountData) {
-            // Update existing record
-            await supabase
+        } else {
+          // Update global order counts based on payment method
+          if (paymentMethod === 'cod') {
+            // Update global phone order count for COD orders
+            const { data: phoneCountData, error: phoneCountError } = await supabase
               .from('phone_order_counts')
-              .update({ 
-                order_count: phoneCountData.order_count + 1,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', phoneCountData.id);
-          } else {
-            // Insert new record
-            await supabase
-              .from('phone_order_counts')
-              .insert({
-                phone: formattedPhone,
-                order_count: 1,
-                last_order_date: today
-              });
-          }
-          
-          // Update IP order count
-          if (clientIP) {
-            const { data: ipCountData, error: ipCountError } = await supabase
-              .from('ip_order_counts')
               .select('*')
-              .eq('ip_address', clientIP)
-              .eq('last_order_date', today)
+              .eq('phone', formattedPhone)
               .maybeSingle();
             
-            if (ipCountError) {
-              console.error('Error checking IP order count:', ipCountError);
-            } else if (ipCountData) {
+            if (phoneCountError) {
+              console.error('Error checking phone order count:', phoneCountError);
+            } else if (phoneCountData) {
               // Update existing record
               await supabase
-                .from('ip_order_counts')
+                .from('phone_order_counts')
                 .update({ 
-                  order_count: ipCountData.order_count + 1,
+                  order_count: phoneCountData.order_count + 1,
                   updated_at: new Date().toISOString()
                 })
-                .eq('id', ipCountData.id);
+                .eq('id', phoneCountData.id);
             } else {
               // Insert new record
               await supabase
-                .from('ip_order_counts')
+                .from('phone_order_counts')
                 .insert({
-                  ip_address: clientIP,
+                  phone: formattedPhone,
                   order_count: 1,
                   last_order_date: today
                 });
+            }
+            
+            // Update IP order count for COD orders
+            if (clientIP) {
+              const { data: ipCountData, error: ipCountError } = await supabase
+                .from('ip_order_counts')
+                .select('*')
+                .eq('ip_address', clientIP)
+                .eq('last_order_date', today)
+                .maybeSingle();
+              
+              if (ipCountError) {
+                console.error('Error checking IP order count:', ipCountError);
+              } else if (ipCountData) {
+                // Update existing record
+                await supabase
+                  .from('ip_order_counts')
+                  .update({ 
+                    order_count: ipCountData.order_count + 1,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', ipCountData.id);
+              } else {
+                // Insert new record
+                await supabase
+                  .from('ip_order_counts')
+                  .insert({
+                    ip_address: clientIP,
+                    order_count: 1,
+                    last_order_date: today
+                  });
+              }
+            }
+          } else if (paymentMethod === 'online') {
+            // Update global phone order count for online payment orders
+            const { data: onlinePhoneCountData, error: onlinePhoneCountError } = await supabase
+              .from('online_phone_order_counts')
+              .select('*')
+              .eq('phone', formattedPhone)
+              .maybeSingle();
+            
+            if (onlinePhoneCountError) {
+              console.error('Error checking online phone order count:', onlinePhoneCountError);
+            } else if (onlinePhoneCountData) {
+              // Update existing record
+              await supabase
+                .from('online_phone_order_counts')
+                .update({ 
+                  order_count: onlinePhoneCountData.order_count + 1,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', onlinePhoneCountData.id);
+            } else {
+              // Insert new record
+              await supabase
+                .from('online_phone_order_counts')
+                .insert({
+                  phone: formattedPhone,
+                  order_count: 1,
+                  last_order_date: today
+                });
+            }
+            
+            // Update IP order count for online payment orders
+            if (clientIP) {
+              const { data: onlineIpCountData, error: onlineIpCountError } = await supabase
+                .from('online_ip_order_counts')
+                .select('*')
+                .eq('ip_address', clientIP)
+                .eq('last_order_date', today)
+                .maybeSingle();
+              
+              if (onlineIpCountError) {
+                console.error('Error checking online IP order count:', onlineIpCountError);
+              } else if (onlineIpCountData) {
+                // Update existing record
+                await supabase
+                  .from('online_ip_order_counts')
+                  .update({ 
+                    order_count: onlineIpCountData.order_count + 1,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', onlineIpCountData.id);
+              } else {
+                // Insert new record
+                await supabase
+                  .from('online_ip_order_counts')
+                  .insert({
+                    ip_address: clientIP,
+                    order_count: 1,
+                    last_order_date: today
+                  });
+              }
             }
           }
         }

@@ -146,7 +146,11 @@ interface CodRestriction {
   id: string;
   phone_order_limit: number;
   ip_daily_order_limit: number;
+  online_phone_order_limit: number;
+  online_ip_daily_order_limit: number;
   is_active: boolean;
+  cod_restrictions_enabled: boolean;
+  online_restrictions_enabled: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -909,7 +913,11 @@ export default function AdminDashboard() {
       const data = {
         phone_order_limit: parseInt(codRestrictionData.phone_order_limit) || 10,
         ip_daily_order_limit: parseInt(codRestrictionData.ip_daily_order_limit) || 5,
+        online_phone_order_limit: parseInt(codRestrictionData.online_phone_order_limit) || 10,
+        online_ip_daily_order_limit: parseInt(codRestrictionData.online_ip_daily_order_limit) || 5,
         is_active: codRestrictionData.is_active,
+        cod_restrictions_enabled: codRestrictionData.cod_restrictions_enabled,
+        online_restrictions_enabled: codRestrictionData.online_restrictions_enabled,
       };
 
       // Since there should only be one COD restriction record, we'll update the existing one or insert a new one
@@ -1205,7 +1213,11 @@ export default function AdminDashboard() {
     setCodRestrictionForm({ 
       phone_order_limit: '10', 
       ip_daily_order_limit: '5', 
-      is_active: true 
+      online_phone_order_limit: '10', 
+      online_ip_daily_order_limit: '5', 
+      is_active: true,
+      cod_restrictions_enabled: true,
+      online_restrictions_enabled: true
     });
     setEditingCodRestriction(null);
   };
@@ -1228,7 +1240,11 @@ export default function AdminDashboard() {
       setCodRestrictionForm({
         phone_order_limit: restriction.phone_order_limit.toString(),
         ip_daily_order_limit: restriction.ip_daily_order_limit.toString(),
+        online_phone_order_limit: restriction.online_phone_order_limit?.toString() || '10',
+        online_ip_daily_order_limit: restriction.online_ip_daily_order_limit?.toString() || '5',
         is_active: restriction.is_active,
+        cod_restrictions_enabled: restriction.cod_restrictions_enabled !== undefined ? restriction.cod_restrictions_enabled : true,
+        online_restrictions_enabled: restriction.online_restrictions_enabled !== undefined ? restriction.online_restrictions_enabled : true,
       });
     }
   }, [codRestrictions]);
@@ -1323,6 +1339,8 @@ export default function AdminDashboard() {
     // Validate inputs
     const phoneLimit = parseInt(codRestrictionForm.phone_order_limit);
     const ipLimit = parseInt(codRestrictionForm.ip_daily_order_limit);
+    const onlinePhoneLimit = parseInt(codRestrictionForm.online_phone_order_limit);
+    const onlineIpLimit = parseInt(codRestrictionForm.online_ip_daily_order_limit);
     
     if (isNaN(phoneLimit) || phoneLimit <= 0) {
       toast.error('Please enter a valid phone order limit');
@@ -1331,6 +1349,16 @@ export default function AdminDashboard() {
     
     if (isNaN(ipLimit) || ipLimit <= 0) {
       toast.error('Please enter a valid IP daily order limit');
+      return;
+    }
+    
+    if (isNaN(onlinePhoneLimit) || onlinePhoneLimit <= 0) {
+      toast.error('Please enter a valid online payment phone order limit');
+      return;
+    }
+    
+    if (isNaN(onlineIpLimit) || onlineIpLimit <= 0) {
+      toast.error('Please enter a valid online payment IP daily order limit');
       return;
     }
     
@@ -2973,10 +3001,10 @@ export default function AdminDashboard() {
               <div className="bg-card rounded-xl border border-border/50 p-6 max-w-2xl">
                 <form onSubmit={handleSubmitCodRestriction} className="space-y-6">
                   <div>
-                    <h3 className="font-display text-lg font-semibold mb-4">Order Limits</h3>
+                    <h3 className="font-display text-lg font-semibold mb-4">COD Order Limits</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="phone_order_limit">Max Orders Per Phone Number</Label>
+                        <Label htmlFor="phone_order_limit">Max COD Orders Per Phone Number</Label>
                         <Input
                           id="phone_order_limit"
                           type="number"
@@ -2989,7 +3017,7 @@ export default function AdminDashboard() {
                         <p className="text-sm text-muted-foreground mt-1">Maximum number of COD orders allowed per phone number</p>
                       </div>
                       <div>
-                        <Label htmlFor="ip_daily_order_limit">Max Daily Orders Per IP</Label>
+                        <Label htmlFor="ip_daily_order_limit">Max Daily COD Orders Per IP</Label>
                         <Input
                           id="ip_daily_order_limit"
                           type="number"
@@ -3003,14 +3031,56 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
+                  
+                  <div>
+                    <h3 className="font-display text-lg font-semibold mb-4">Online Payment Order Limits</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="online_phone_order_limit">Max Online Orders Per Phone Number</Label>
+                        <Input
+                          id="online_phone_order_limit"
+                          type="number"
+                          min="1"
+                          value={codRestrictionForm.online_phone_order_limit}
+                          onChange={(e) => setCodRestrictionForm({ ...codRestrictionForm, online_phone_order_limit: e.target.value })}
+                          className="mt-1"
+                          placeholder="10"
+                        />
+                        <p className="text-sm text-muted-foreground mt-1">Maximum number of online payment orders allowed per phone number</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="online_ip_daily_order_limit">Max Daily Online Orders Per IP</Label>
+                        <Input
+                          id="online_ip_daily_order_limit"
+                          type="number"
+                          min="1"
+                          value={codRestrictionForm.online_ip_daily_order_limit}
+                          onChange={(e) => setCodRestrictionForm({ ...codRestrictionForm, online_ip_daily_order_limit: e.target.value })}
+                          className="mt-1"
+                          placeholder="5"
+                        />
+                        <p className="text-sm text-muted-foreground mt-1">Maximum number of online payment orders allowed per IP address per day</p>
+                      </div>
+                    </div>
+                  </div>
 
-                  <div className="flex items-center gap-3 pt-4">
-                    <Switch 
-                      id="cod_active"
-                      checked={codRestrictionForm.is_active} 
-                      onCheckedChange={(checked) => setCodRestrictionForm({ ...codRestrictionForm, is_active: checked })} 
-                    />
-                    <Label htmlFor="cod_active">Enable COD Restrictions</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    <div className="flex items-center gap-3">
+                      <Switch 
+                        id="cod_restrictions_enabled"
+                        checked={codRestrictionForm.cod_restrictions_enabled} 
+                        onCheckedChange={(checked) => setCodRestrictionForm({ ...codRestrictionForm, cod_restrictions_enabled: checked })} 
+                      />
+                      <Label htmlFor="cod_restrictions_enabled">Enable COD Restrictions</Label>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Switch 
+                        id="online_restrictions_enabled"
+                        checked={codRestrictionForm.online_restrictions_enabled} 
+                        onCheckedChange={(checked) => setCodRestrictionForm({ ...codRestrictionForm, online_restrictions_enabled: checked })} 
+                      />
+                      <Label htmlFor="online_restrictions_enabled">Enable Online Payment Restrictions</Label>
+                    </div>
                   </div>
 
                   <div className="pt-4">
@@ -3028,11 +3098,24 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="pt-4 text-sm text-muted-foreground border-t border-border/50">
-                    <p><strong>Note:</strong> These restrictions only apply to Cash on Delivery (COD) orders.</p>
-                    <p className="mt-1">Current settings: {codRestrictions && codRestrictions.length > 0 ? 
+                    <p><strong>Note:</strong> These restrictions can be enabled/disabled separately for Cash on Delivery (COD) and Online Payment orders.</p>
+                    <p className="mt-1">Current COD settings: {codRestrictions && codRestrictions.length > 0 ? 
                       `${codRestrictions[0].phone_order_limit} orders per phone, ${codRestrictions[0].ip_daily_order_limit} orders per IP daily` : 
                       'Loading...'
                     }</p>
+                    <p className="mt-1">Current Online Payment settings: {codRestrictions && codRestrictions.length > 0 ? 
+                      `${codRestrictions[0].online_phone_order_limit} orders per phone, ${codRestrictions[0].online_ip_daily_order_limit} orders per IP daily` : 
+                      'Loading...'
+                    }</p>
+                    <p className="mt-1">
+                      COD Restrictions: <span className={codRestrictions && codRestrictions.length > 0 && codRestrictions[0].cod_restrictions_enabled ? 'text-green-600' : 'text-red-600'}>
+                        {codRestrictions && codRestrictions.length > 0 && codRestrictions[0].cod_restrictions_enabled ? 'Enabled' : 'Disabled'}
+                      </span>
+                      {' | '}
+                      Online Payment Restrictions: <span className={codRestrictions && codRestrictions.length > 0 && codRestrictions[0].online_restrictions_enabled ? 'text-green-600' : 'text-red-600'}>
+                        {codRestrictions && codRestrictions.length > 0 && codRestrictions[0].online_restrictions_enabled ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </p>
                   </div>
                 </form>
               </div>
