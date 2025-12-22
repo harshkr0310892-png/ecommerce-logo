@@ -9,183 +9,101 @@
 
 @layer base {
   :root {
-    /* Premium Light Theme - Clean Ivory & Soft Gold */
+    /* Royal Light Theme - Cream & Gold */
     --background: 45 30% 97%;
-    --foreground: 220 15% 15%;
+    --foreground: 30 20% 15%;
 
     --card: 45 25% 95%;
-    --card-foreground: 220 15% 15%;
+    --card-foreground: 30 20% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 15%;
+    --popover: 45 25% 95%;
+    --popover-foreground: 30 20% 15%;
 
-    --primary: 220 12% 45%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 43 74% 49%;
+    --primary-foreground: 30 20% 10%;
 
-    --secondary: 220 10% 92%;
-    --secondary-foreground: 220 12% 30%;
+    --secondary: 30 15% 88%;
+    --secondary-foreground: 30 20% 20%;
 
-    --muted: 45 15% 92%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 30 10% 90%;
+    --muted-foreground: 30 10% 45%;
 
-    --accent: 42 65% 52%;
-    --accent-foreground: 220 15% 10%;
+    --accent: 43 60% 55%;
+    --accent-foreground: 30 20% 10%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 88%;
-    --input: 220 13% 91%;
-    --ring: 42 65% 52%;
+    --border: 30 20% 85%;
+    --input: 30 20% 85%;
+    --ring: 43 74% 49%;
 
     --radius: 0.5rem;
 
-    /* Gold Accents */
-    --gold: 42 65% 52%;
-    --gold-light: 45 60% 65%;
-    --gold-dark: 38 70% 40%;
-    
-    /* Neutral Palette */
+    /* Royal specific */
+    --gold: 43 74% 49%;
+    --gold-light: 45 70% 65%;
+    --gold-dark: 40 80% 35%;
     --cream: 45 30% 97%;
-    --cream-dark: 45 20% 92%;
-    --royal-text: 220 15% 15%;
+    --cream-dark: 40 20% 90%;
+    --royal-text: 30 20% 15%;
 
-    /* Sophisticated Grays */
-    --gray-50: 220 14% 96%;
-    --gray-100: 220 13% 91%;
-    --gray-200: 220 13% 86%;
-    --gray-300: 220 12% 77%;
-    --gray-400: 220 11% 60%;
-    --gray-500: 220 10% 46%;
-    --gray-600: 220 12% 35%;
-    --gray-700: 220 14% 25%;
-    --gray-800: 220 16% 17%;
-    --gray-900: 220 18% 11%;
-
-    /* Classic Accent Colors */
-    --ivory: 48 50% 95%;
-    --champagne: 40 35% 82%;
-    --bronze: 32 45% 45%;
-    --sepia: 28 20% 40%;
-    --parchment: 45 30% 93%;
-    --warm-white: 40 40% 98%;
-    --cool-gray: 220 10% 55%;
-    --slate: 215 16% 47%;
-    --burgundy: 345 50% 40%;
-    --sage: 140 20% 50%;
-    --dusty-rose: 350 35% 65%;
-    --slate-blue: 215 35% 50%;
-    --terracotta: 18 50% 52%;
-    --olive: 85 25% 42%;
-    --emerald: 160 50% 40%;
-    --navy: 220 50% 30%;
-
-    /* Sidebar */
-    --sidebar-background: 45 25% 94%;
-    --sidebar-foreground: 220 15% 18%;
-    --sidebar-primary: 220 12% 45%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 42 65% 52%;
-    --sidebar-accent-foreground: 220 15% 10%;
-    --sidebar-border: 220 13% 86%;
-    --sidebar-ring: 42 65% 52%;
-
-    /* Status Colors */
-    --success: 160 60% 42%;
-    --success-foreground: 0 0% 100%;
-    --warning: 42 90% 52%;
-    --warning-foreground: 220 15% 10%;
-    --info: 210 80% 55%;
-    --info-foreground: 0 0% 100%;
+    --sidebar-background: 45 25% 95%;
+    --sidebar-foreground: 30 20% 20%;
+    --sidebar-primary: 43 74% 49%;
+    --sidebar-primary-foreground: 30 20% 10%;
+    --sidebar-accent: 30 15% 88%;
+    --sidebar-accent-foreground: 30 20% 20%;
+    --sidebar-border: 30 20% 85%;
+    --sidebar-ring: 43 74% 49%;
   }
 
   .dark {
-    /* Premium Dark Theme - Pure Slate & Clean Gold */
-    --background: 222 20% 7%;
-    --foreground: 210 20% 92%;
+    /* Royal Dark Theme - Deep Charcoal & Gold */
+    --background: 220 20% 10%;
+    --foreground: 45 20% 92%;
 
-    --card: 222 18% 10%;
-    --card-foreground: 210 20% 92%;
+    --card: 220 18% 14%;
+    --card-foreground: 45 20% 92%;
 
-    --popover: 222 20% 9%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 220 18% 14%;
+    --popover-foreground: 45 20% 92%;
 
-    --primary: 215 15% 55%;
-    --primary-foreground: 222 20% 7%;
+    --primary: 43 74% 55%;
+    --primary-foreground: 220 20% 10%;
 
-    --secondary: 220 14% 16%;
-    --secondary-foreground: 210 15% 80%;
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 45 20% 90%;
 
-    --muted: 220 15% 14%;
-    --muted-foreground: 215 12% 55%;
+    --muted: 220 12% 18%;
+    --muted-foreground: 45 10% 60%;
 
-    --accent: 45 70% 55%;
-    --accent-foreground: 222 20% 7%;
+    --accent: 43 65% 50%;
+    --accent-foreground: 220 20% 10%;
 
-    --destructive: 0 65% 55%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 14% 18%;
-    --input: 220 14% 16%;
-    --ring: 45 70% 55%;
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 43 74% 55%;
 
-    /* Gold Accents - Dark Mode */
-    --gold: 45 70% 55%;
-    --gold-light: 48 65% 68%;
-    --gold-dark: 42 75% 45%;
-    
-    /* Neutral Palette - Dark */
-    --cream: 210 20% 92%;
-    --cream-dark: 222 20% 7%;
-    --royal-text: 210 20% 92%;
+    /* Royal specific dark */
+    --gold: 43 74% 55%;
+    --gold-light: 45 70% 70%;
+    --gold-dark: 40 80% 40%;
+    --cream: 45 20% 92%;
+    --cream-dark: 220 20% 10%;
+    --royal-text: 45 20% 92%;
 
-    /* Sophisticated Grays - Dark Mode */
-    --gray-50: 220 15% 85%;
-    --gray-100: 220 14% 75%;
-    --gray-200: 220 13% 65%;
-    --gray-300: 220 12% 55%;
-    --gray-400: 220 11% 45%;
-    --gray-500: 220 10% 35%;
-    --gray-600: 220 12% 25%;
-    --gray-700: 220 14% 18%;
-    --gray-800: 220 16% 12%;
-    --gray-900: 222 20% 7%;
-
-    /* Classic Accent Colors - Dark Mode */
-    --ivory: 45 15% 85%;
-    --champagne: 42 30% 70%;
-    --bronze: 35 45% 55%;
-    --sepia: 30 20% 55%;
-    --parchment: 45 15% 80%;
-    --warm-white: 45 20% 88%;
-    --cool-gray: 220 10% 50%;
-    --slate: 215 15% 55%;
-    --burgundy: 345 45% 50%;
-    --sage: 140 22% 55%;
-    --dusty-rose: 350 30% 65%;
-    --slate-blue: 215 40% 58%;
-    --terracotta: 18 45% 58%;
-    --olive: 85 22% 50%;
-    --emerald: 160 45% 50%;
-    --navy: 220 45% 45%;
-
-    /* Sidebar - Dark Mode */
-    --sidebar-background: 222 18% 8%;
-    --sidebar-foreground: 210 18% 88%;
-    --sidebar-primary: 215 15% 55%;
-    --sidebar-primary-foreground: 222 20% 7%;
-    --sidebar-accent: 45 70% 55%;
-    --sidebar-accent-foreground: 222 20% 7%;
-    --sidebar-border: 220 14% 18%;
-    --sidebar-ring: 45 70% 55%;
-
-    /* Status Colors - Dark Mode */
-    --success: 160 55% 48%;
-    --success-foreground: 0 0% 100%;
-    --warning: 45 85% 55%;
-    --warning-foreground: 222 20% 7%;
-    --info: 210 75% 58%;
-    --info-foreground: 0 0% 100%;
+    --sidebar-background: 220 18% 12%;
+    --sidebar-foreground: 45 20% 90%;
+    --sidebar-primary: 43 74% 55%;
+    --sidebar-primary-foreground: 220 20% 10%;
+    --sidebar-accent: 220 15% 20%;
+    --sidebar-accent-foreground: 45 20% 90%;
+    --sidebar-border: 220 15% 22%;
+    --sidebar-ring: 43 74% 55%;
   }
 }
 
@@ -196,34 +114,10 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
-    letter-spacing: -0.02em;
-  }
-
-  h1 {
-    @apply text-4xl md:text-5xl font-bold tracking-tight;
-  }
-
-  h2 {
-    @apply text-3xl md:text-4xl font-semibold;
-  }
-
-  h3 {
-    @apply text-2xl md:text-3xl font-semibold;
-  }
-
-  h4 {
-    @apply text-xl md:text-2xl font-medium;
-  }
-
-  p {
-    @apply leading-relaxed;
   }
 }
 
@@ -231,231 +125,6 @@
   .font-display {
     font-family: 'Playfair Display', serif;
   }
-
-  /* ============================================
-     GRAY BUTTON SYSTEM - Premium & Elegant
-     ============================================ */
-
-  /* Primary Gray Button */
-  .btn-primary {
-    @apply px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
-    background: linear-gradient(180deg, 
-      hsl(var(--gray-500)) 0%, 
-      hsl(var(--gray-600)) 100%
-    );
-    color: white;
-    box-shadow: 
-      0 1px 3px hsl(var(--gray-900) / 0.2),
-      inset 0 1px 0 hsl(var(--gray-400) / 0.3);
-  }
-
-  .btn-primary:hover {
-    background: linear-gradient(180deg, 
-      hsl(var(--gray-400)) 0%, 
-      hsl(var(--gray-500)) 100%
-    );
-    box-shadow: 
-      0 4px 12px hsl(var(--gray-900) / 0.25),
-      inset 0 1px 0 hsl(var(--gray-300) / 0.3);
-    transform: translateY(-1px);
-  }
-
-  .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 
-      0 1px 2px hsl(var(--gray-900) / 0.2),
-      inset 0 1px 2px hsl(var(--gray-700) / 0.2);
-  }
-
-  /* Secondary Gray Button */
-  .btn-secondary {
-    @apply px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
-    background: hsl(var(--gray-100));
-    color: hsl(var(--gray-700));
-    border: 1px solid hsl(var(--gray-200));
-  }
-
-  .dark .btn-secondary {
-    background: hsl(var(--gray-700));
-    color: hsl(var(--gray-100));
-    border-color: hsl(var(--gray-600));
-  }
-
-  .btn-secondary:hover {
-    background: hsl(var(--gray-200));
-    border-color: hsl(var(--gray-300));
-  }
-
-  .dark .btn-secondary:hover {
-    background: hsl(var(--gray-600));
-    border-color: hsl(var(--gray-500));
-  }
-
-  /* Ghost Gray Button */
-  .btn-ghost {
-    @apply px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
-    background: transparent;
-    color: hsl(var(--gray-600));
-  }
-
-  .dark .btn-ghost {
-    color: hsl(var(--gray-300));
-  }
-
-  .btn-ghost:hover {
-    background: hsl(var(--gray-100));
-    color: hsl(var(--gray-700));
-  }
-
-  .dark .btn-ghost:hover {
-    background: hsl(var(--gray-800));
-    color: hsl(var(--gray-100));
-  }
-
-  /* Outline Gray Button */
-  .btn-outline {
-    @apply px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
-    background: transparent;
-    color: hsl(var(--gray-600));
-    border: 1.5px solid hsl(var(--gray-400));
-  }
-
-  .dark .btn-outline {
-    color: hsl(var(--gray-300));
-    border-color: hsl(var(--gray-500));
-  }
-
-  .btn-outline:hover {
-    background: hsl(var(--gray-600));
-    color: white;
-    border-color: hsl(var(--gray-600));
-  }
-
-  .dark .btn-outline:hover {
-    background: hsl(var(--gray-500));
-    color: white;
-    border-color: hsl(var(--gray-500));
-  }
-
-  /* Soft Gray Button */
-  .btn-soft {
-    @apply px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
-    background: hsl(var(--gray-100));
-    color: hsl(var(--gray-700));
-  }
-
-  .dark .btn-soft {
-    background: hsl(var(--gray-800));
-    color: hsl(var(--gray-200));
-  }
-
-  .btn-soft:hover {
-    background: hsl(var(--gray-200));
-  }
-
-  .dark .btn-soft:hover {
-    background: hsl(var(--gray-700));
-  }
-
-  /* ============================================
-     GOLD ACCENT BUTTONS
-     ============================================ */
-
-  .btn-gold {
-    @apply px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
-    background: linear-gradient(180deg, 
-      hsl(var(--gold)) 0%, 
-      hsl(var(--gold-dark)) 100%
-    );
-    color: hsl(var(--gray-900));
-    box-shadow: 
-      0 1px 3px hsl(var(--gold-dark) / 0.3),
-      inset 0 1px 0 hsl(var(--gold-light) / 0.4);
-  }
-
-  .btn-gold:hover {
-    background: linear-gradient(180deg, 
-      hsl(var(--gold-light)) 0%, 
-      hsl(var(--gold)) 100%
-    );
-    box-shadow: 
-      0 4px 15px hsl(var(--gold) / 0.4),
-      inset 0 1px 0 hsl(var(--gold-light) / 0.5);
-    transform: translateY(-1px);
-  }
-
-  .btn-gold-outline {
-    @apply px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
-    background: transparent;
-    color: hsl(var(--gold));
-    border: 1.5px solid hsl(var(--gold));
-  }
-
-  .btn-gold-outline:hover {
-    background: hsl(var(--gold) / 0.1);
-    border-color: hsl(var(--gold-light));
-  }
-
-  .btn-gold-soft {
-    @apply px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
-    background: hsl(var(--gold) / 0.12);
-    color: hsl(var(--gold-dark));
-  }
-
-  .dark .btn-gold-soft {
-    background: hsl(var(--gold) / 0.15);
-    color: hsl(var(--gold));
-  }
-
-  .btn-gold-soft:hover {
-    background: hsl(var(--gold) / 0.2);
-  }
-
-  /* ============================================
-     BUTTON SIZES
-     ============================================ */
-
-  .btn-xs {
-    @apply px-2.5 py-1 text-xs rounded;
-  }
-
-  .btn-sm {
-    @apply px-3.5 py-1.5 text-sm rounded-md;
-  }
-
-  .btn-lg {
-    @apply px-7 py-3 text-lg rounded-lg;
-  }
-
-  .btn-xl {
-    @apply px-8 py-4 text-xl rounded-xl;
-  }
-
-  /* Icon Button */
-  .btn-icon {
-    @apply p-2.5 rounded-lg transition-all duration-200;
-    background: hsl(var(--gray-100));
-    color: hsl(var(--gray-600));
-  }
-
-  .dark .btn-icon {
-    background: hsl(var(--gray-800));
-    color: hsl(var(--gray-300));
-  }
-
-  .btn-icon:hover {
-    background: hsl(var(--gray-200));
-    color: hsl(var(--gray-700));
-  }
-
-  .dark .btn-icon:hover {
-    background: hsl(var(--gray-700));
-    color: hsl(var(--gray-100));
-  }
-
-  /* ============================================
-     GOLD UTILITIES
-     ============================================ */
 
   .text-gold {
     color: hsl(var(--gold));
@@ -480,375 +149,104 @@
     background-clip: text;
   }
 
-  /* ============================================
-     COLOR UTILITIES
-     ============================================ */
-
-  .text-ivory { color: hsl(var(--ivory)); }
-  .bg-ivory { background-color: hsl(var(--ivory)); }
-  
-  .text-champagne { color: hsl(var(--champagne)); }
-  .bg-champagne { background-color: hsl(var(--champagne)); }
-  
-  .text-bronze { color: hsl(var(--bronze)); }
-  .bg-bronze { background-color: hsl(var(--bronze)); }
-  
-  .text-slate { color: hsl(var(--slate)); }
-  .bg-slate { background-color: hsl(var(--slate)); }
-  
-  .text-burgundy { color: hsl(var(--burgundy)); }
-  .bg-burgundy { background-color: hsl(var(--burgundy)); }
-  
-  .text-sage { color: hsl(var(--sage)); }
-  .bg-sage { background-color: hsl(var(--sage)); }
-  
-  .text-dusty-rose { color: hsl(var(--dusty-rose)); }
-  .bg-dusty-rose { background-color: hsl(var(--dusty-rose)); }
-  
-  .text-slate-blue { color: hsl(var(--slate-blue)); }
-  .bg-slate-blue { background-color: hsl(var(--slate-blue)); }
-  
-  .text-terracotta { color: hsl(var(--terracotta)); }
-  .bg-terracotta { background-color: hsl(var(--terracotta)); }
-  
-  .text-emerald { color: hsl(var(--emerald)); }
-  .bg-emerald { background-color: hsl(var(--emerald)); }
-  
-  .text-navy { color: hsl(var(--navy)); }
-  .bg-navy { background-color: hsl(var(--navy)); }
-
-  .text-cool-gray { color: hsl(var(--cool-gray)); }
-  .bg-cool-gray { background-color: hsl(var(--cool-gray)); }
-
-  /* ============================================
-     GRADIENTS
-     ============================================ */
-
-  .gradient-classic {
-    background: linear-gradient(135deg, hsl(var(--cream)) 0%, hsl(var(--champagne)) 100%);
-  }
-
-  .gradient-slate {
-    background: linear-gradient(135deg, hsl(var(--gray-600)) 0%, hsl(var(--gray-800)) 100%);
-  }
-
-  .gradient-elegant {
-    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
-  }
-
-  .gradient-premium {
-    background: linear-gradient(135deg, 
-      hsl(var(--gray-800)) 0%, 
-      hsl(var(--gray-900)) 50%,
-      hsl(var(--gray-800)) 100%
-    );
-  }
-
-  .gradient-subtle {
-    background: linear-gradient(180deg, 
-      hsl(var(--card)) 0%, 
-      hsl(var(--muted) / 0.5) 100%
-    );
-  }
-
-  /* ============================================
-     SHADOWS
-     ============================================ */
-
-  .shadow-soft {
-    box-shadow: 0 2px 15px -3px hsl(var(--foreground) / 0.08);
-  }
-
-  .shadow-elegant {
-    box-shadow: 
-      0 1px 2px hsl(var(--foreground) / 0.06),
-      0 4px 12px hsl(var(--foreground) / 0.08);
-  }
-
-  .shadow-premium {
-    box-shadow: 
-      0 2px 4px hsl(var(--foreground) / 0.04),
-      0 8px 24px hsl(var(--foreground) / 0.1),
-      0 16px 48px hsl(var(--foreground) / 0.06);
-  }
-
-  .shadow-gold {
+  .royal-shadow {
     box-shadow: 0 4px 20px -4px hsl(var(--gold) / 0.3);
   }
 
-  .shadow-gold-lg {
+  .royal-shadow-lg {
     box-shadow: 0 8px 40px -8px hsl(var(--gold) / 0.4);
   }
 
-  .glow-gold {
+  .royal-glow {
     box-shadow: 0 0 30px hsl(var(--gold) / 0.2);
   }
-
-  .glow-soft {
-    box-shadow: 0 0 40px hsl(var(--foreground) / 0.05);
-  }
-
-  /* ============================================
-     CARDS
-     ============================================ */
-
-  .card-elevated {
-    @apply bg-card rounded-xl;
-    border: 1px solid hsl(var(--border));
-    box-shadow: 
-      0 1px 3px hsl(var(--foreground) / 0.04),
-      0 6px 16px hsl(var(--foreground) / 0.06);
-  }
-
-  .card-premium {
-    @apply bg-card rounded-xl;
-    border: 1px solid hsl(var(--border) / 0.6);
-    box-shadow: 
-      0 2px 4px hsl(var(--foreground) / 0.02),
-      0 12px 32px hsl(var(--foreground) / 0.08);
-  }
-
-  .card-glass {
-    background: hsl(var(--card) / 0.8);
-    backdrop-filter: blur(16px);
-    border: 1px solid hsl(var(--border) / 0.5);
-    border-radius: 1rem;
-  }
-
-  .card-glass-premium {
-    background: hsl(var(--background) / 0.7);
-    backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid hsl(var(--border) / 0.3);
-    border-radius: 1rem;
-  }
-
-  /* ============================================
-     INPUTS
-     ============================================ */
-
-  .input-elegant {
-    @apply rounded-lg px-4 py-2.5 transition-all duration-200;
-    background: hsl(var(--input));
-    border: 1px solid hsl(var(--border));
-    color: hsl(var(--foreground));
-  }
-
-  .input-elegant:focus {
-    border-color: hsl(var(--gray-400));
-    box-shadow: 0 0 0 3px hsl(var(--gray-400) / 0.15);
-    outline: none;
-  }
-
-  .input-elegant::placeholder {
-    color: hsl(var(--muted-foreground));
-  }
-
-  .input-gold:focus {
-    border-color: hsl(var(--gold));
-    box-shadow: 0 0 0 3px hsl(var(--gold) / 0.15);
-  }
-
-  /* ============================================
-     BADGES
-     ============================================ */
-
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-  }
-
-  .badge-gray {
-    background: hsl(var(--gray-100));
-    color: hsl(var(--gray-700));
-  }
-
-  .dark .badge-gray {
-    background: hsl(var(--gray-700));
-    color: hsl(var(--gray-200));
-  }
-
-  .badge-gold {
-    background: hsl(var(--gold) / 0.15);
-    color: hsl(var(--gold-dark));
-  }
-
-  .dark .badge-gold {
-    background: hsl(var(--gold) / 0.2);
-    color: hsl(var(--gold));
-  }
-
-  .badge-success {
-    background: hsl(var(--success) / 0.15);
-    color: hsl(var(--success));
-  }
-
-  .badge-warning {
-    background: hsl(var(--warning) / 0.15);
-    color: hsl(var(--warning));
-  }
-
-  .badge-info {
-    background: hsl(var(--info) / 0.15);
-    color: hsl(var(--info));
-  }
-
-  .badge-danger {
-    background: hsl(var(--destructive) / 0.15);
-    color: hsl(var(--destructive));
-  }
-
-  /* ============================================
-     DIVIDERS & DECORATIVE
-     ============================================ */
-
-  .divider {
-    height: 1px;
-    background: hsl(var(--border));
-  }
-
-  .divider-gold {
-    height: 1px;
-    background: linear-gradient(90deg, 
-      transparent 0%, 
-      hsl(var(--gold) / 0.4) 20%, 
-      hsl(var(--gold) / 0.6) 50%, 
-      hsl(var(--gold) / 0.4) 80%, 
-      transparent 100%
-    );
-  }
-
-  .divider-fade {
-    height: 1px;
-    background: linear-gradient(90deg, 
-      transparent 0%, 
-      hsl(var(--border)) 20%, 
-      hsl(var(--border)) 80%, 
-      transparent 100%
-    );
-  }
-
-  /* ============================================
-     TEXT EFFECTS
-     ============================================ */
-
-  ::selection {
-    background: hsl(var(--gold) / 0.25);
-    color: hsl(var(--foreground));
-  }
-
-  .highlight-gold {
-    background: linear-gradient(180deg, transparent 65%, hsl(var(--gold) / 0.25) 65%);
-  }
-
-  .text-gradient-gold {
-    background: linear-gradient(135deg, hsl(var(--gold-dark)), hsl(var(--gold)), hsl(var(--gold-light)));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* ============================================
-     HOVER EFFECTS
-     ============================================ */
-
-  .hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px -5px hsl(var(--foreground) / 0.1);
-  }
-
-  .hover-glow-gold:hover {
-    box-shadow: 0 0 25px hsl(var(--gold) / 0.3);
-  }
-
-  .hover-scale {
-    transition: transform 0.2s ease;
-  }
-
-  .hover-scale:hover {
-    transform: scale(1.02);
-  }
-
-  .hover-brightness:hover {
-    filter: brightness(1.05);
-  }
 }
 
-/* ============================================
-   ANIMATIONS
-   ============================================ */
-
+/* Royal animations */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fade-in-scale {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes slide-in-right {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes pulse-gold {
-  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--gold) / 0.4); }
-  50% { box-shadow: 0 0 20px 8px hsl(var(--gold) / 0); }
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--gold) / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px hsl(var(--gold) / 0);
+  }
 }
 
-@keyframes glow {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
 }
 
-.animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
-.animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
-.animate-fade-in-scale { animation: fade-in-scale 0.4s ease-out forwards; }
-.animate-slide-in-right { animation: slide-in-right 0.5s ease-out forwards; }
-.animate-float { animation: float 3s ease-in-out infinite; }
-.animate-pulse-gold { animation: pulse-gold 2s infinite; }
-.animate-glow { animation: glow 2s ease-in-out infinite; }
+.animate-fade-in-scale {
+  animation: fade-in-scale 0.4s ease-out forwards;
+}
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent 0%, hsl(var(--gold) / 0.3) 50%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--gold) / 0.3) 50%,
+    transparent 100%
+  );
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
 
-/* Stagger delays */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s infinite;
+}
+
+/* Staggered animations */
 .stagger-1 { animation-delay: 0.1s; }
 .stagger-2 { animation-delay: 0.2s; }
 .stagger-3 { animation-delay: 0.3s; }
 .stagger-4 { animation-delay: 0.4s; }
 .stagger-5 { animation-delay: 0.5s; }
 
-/* Transitions */
-.transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-.transition-bounce { transition: all 0.4s cubic-bezier(0.68, -0.3, 0.265, 1.3); }
-
-/* ============================================
-   SCROLLBAR
-   ============================================ */
-
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -856,48 +254,16 @@
 
 ::-webkit-scrollbar-track {
   background: hsl(var(--muted));
-  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--gray-400));
+  background: hsl(var(--gold) / 0.5);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--gray-500));
+  background: hsl(var(--gold));
 }
-
-.dark ::-webkit-scrollbar-thumb {
-  background: hsl(var(--gray-600));
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--gray-500));
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--gray-400)) hsl(var(--muted));
-}
-
-/* ============================================
-   ACCESSIBILITY & PRINT
-   ============================================ */
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-@media print {
-  .no-print { display: none !important; }
-  body { background: white !important; color: black !important; }
-}
-
 .text-secondary-foreground {
-  color: hsl(var(--secondary-foreground));
+    color: hsl(46deg 90% 56%);
 }
