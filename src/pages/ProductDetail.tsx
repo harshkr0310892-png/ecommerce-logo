@@ -95,6 +95,12 @@ export default function ProductDetail() {
   const width = (product as any)?.width || null;
   const weight = (product as any)?.weight || null;
 
+  // Get brand and seller from product data
+  const brand = (product as any)?.brand || null;
+  const brand_logo_url = (product as any)?.brand_logo_url || null;
+  const seller_name = (product as any)?.seller_name || null;
+  const seller_description = (product as any)?.seller_description || null;
+
   const handleVariantChange = (variant: any, attributeName: string, valueName: string) => {
     if (variant) {
       setSelectedVariant({
@@ -126,6 +132,7 @@ export default function ProductDetail() {
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: product.id,
+        product_id: product.id,
         name: product.name,
         price: finalPrice,
         discount_percentage: selectedVariant ? 0 : (product.discount_percentage || 0),
@@ -751,7 +758,7 @@ export default function ProductDetail() {
             </div>
 
             {/* Product Details Tabs */}
-            {(product.detailed_description || productFeatures.length > 0 || height || width || weight) && (
+            {(product.detailed_description || productFeatures.length > 0 || height || width || weight || brand || seller_name) && (
               <div className="mb-6">
                 {/* Selected Variant Info */}
                 {selectedVariant && (
@@ -807,6 +814,34 @@ export default function ProductDetail() {
                       Dimensions
                     </button>
                   )}
+
+                  {brand && (
+                    <button
+                      className={cn(
+                        "px-4 py-2 text-sm font-medium transition-colors",
+                        activeTab === 'branding' 
+                          ? "text-primary border-b-2 border-primary" 
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                      onClick={() => setActiveTab('branding')}
+                    >
+                      Branding
+                    </button>
+                  )}
+
+                  {seller_name && (
+                    <button
+                      className={cn(
+                        "px-4 py-2 text-sm font-medium transition-colors",
+                        activeTab === 'seller' 
+                          ? "text-primary border-b-2 border-primary" 
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                      onClick={() => setActiveTab('seller')}
+                    >
+                      Seller
+                    </button>
+                  )}
                 </div>
                 
                 <div className="mt-4">
@@ -851,6 +886,35 @@ export default function ProductDetail() {
                           <p className="text-muted-foreground">{weight}</p>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {activeTab === 'branding' && brand && (
+                    <div className="flex items-center gap-4">
+                      {brand_logo_url && (
+                        <img 
+                          src={brand_logo_url} 
+                          alt={brand}
+                          className="w-16 h-16 rounded-full object-cover border border-border"
+                        />
+                      )}
+                      <div>
+                        <h4 className="font-medium text-foreground">Brand</h4>
+                        <p className="text-muted-foreground">{brand}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'seller' && seller_name && (
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium text-foreground mb-2">Seller: {seller_name}</h4>
+                        {seller_description && (
+                          <p className="text-muted-foreground leading-relaxed">
+                            {seller_description}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

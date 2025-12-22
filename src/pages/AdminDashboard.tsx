@@ -50,6 +50,13 @@ interface Product {
   height?: string | null;
   width?: string | null;
   weight?: string | null;
+  // Add branding and seller fields
+  brand?: string | null;
+  brand_logo_url?: string | null;
+  seller_name?: string | null;
+  seller_description?: string | null;
+  // Add GST field
+  gst_percentage?: number | null;
 }
 
 interface Category {
@@ -59,6 +66,7 @@ interface Category {
   sort_order: number;
   is_active: boolean;
   created_at: string;
+  gst_percentage?: number | null;
 }
 
 interface OrderItem {
@@ -173,6 +181,7 @@ export default function AdminDashboard() {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const brandLogoInputRef = useRef<HTMLInputElement>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [couponDialogOpen, setCouponDialogOpen] = useState(false);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
@@ -180,6 +189,7 @@ export default function AdminDashboard() {
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadingBrandLogo, setUploadingBrandLogo] = useState(false);
   const [productImages, setProductImages] = useState<string[]>([]);
   const [hasVariantImages, setHasVariantImages] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -205,6 +215,13 @@ export default function AdminDashboard() {
     height: '',
     width: '',
     weight: '',
+    // Add branding and seller fields
+    brand: '',
+    brand_logo_url: '',
+    seller_name: '',
+    seller_description: '',
+    // Add GST field
+    gst_percentage: '',
   });
   // Add handler functions for features
   const addFeature = () => {
@@ -236,6 +253,7 @@ export default function AdminDashboard() {
     description: '',
     sort_order: '0',
     is_active: true,
+    gst_percentage: '0',
   });
 
   const [couponForm, setCouponForm] = useState({
@@ -671,6 +689,40 @@ export default function AdminDashboard() {
     setProductImages(productImages.filter((_, i) => i !== index));
   };
 
+  const handleBrandLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    setUploadingBrandLogo(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `brand-logo-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+
+      setProductForm({ ...productForm, brand_logo_url: publicUrl });
+      toast.success('Brand logo uploaded successfully!');
+    } catch (error) {
+      console.error('Error uploading brand logo:', error);
+      toast.error('Failed to upload brand logo');
+    } finally {
+      setUploadingBrandLogo(false);
+      if (brandLogoInputRef.current) {
+        brandLogoInputRef.current.value = '';
+      }
+    }
+  };
+
   // Add/Edit product mutation
   const productMutation = useMutation({
     mutationFn: async (product: typeof productForm & { id?: string }) => {
@@ -696,6 +748,13 @@ export default function AdminDashboard() {
         height: product.height || null,
         width: product.width || null,
         weight: product.weight || null,
+        // Save branding and seller fields
+        brand: product.brand || null,
+        brand_logo_url: product.brand_logo_url || null,
+        seller_name: product.seller_name || null,
+        seller_description: product.seller_description || null,
+        // Save GST field
+        gst_percentage: product.gst_percentage ? parseFloat(product.gst_percentage) : null,
       };
 
       if (product.id) {
@@ -797,6 +856,7 @@ export default function AdminDashboard() {
         description: category.description || null,
         sort_order: parseInt(category.sort_order) || 0,
         is_active: category.is_active,
+        gst_percentage: parseFloat(category.gst_percentage) || 0,
       };
 
       if (category.id) {
@@ -1110,6 +1170,13 @@ export default function AdminDashboard() {
       height: '',
       width: '',
       weight: '',
+      // Add branding and seller fields
+      brand: '',
+      brand_logo_url: '',
+      seller_name: '',
+      seller_description: '',
+      // Add GST field
+      gst_percentage: '',
     });
     setProductImages([]);
     setHasVariantImages(false);
@@ -1147,6 +1214,13 @@ export default function AdminDashboard() {
       height: product.height || '',
       width: product.width || '',
       weight: product.weight || '',
+      // Add branding and seller fields
+      brand: product.brand || '',
+      brand_logo_url: product.brand_logo_url || '',
+      seller_name: product.seller_name || '',
+      seller_description: product.seller_description || '',
+      // Add GST field
+      gst_percentage: product.gst_percentage ? product.gst_percentage.toString() : '',
     });
     setProductImages(product.images || (product.image_url ? [product.image_url] : []));
     setHasVariantImages(false); // Will be updated by ProductVariantsEditor
@@ -1168,7 +1242,7 @@ export default function AdminDashboard() {
   };
 
   const resetCategoryForm = () => {
-    setCategoryForm({ name: '', description: '', sort_order: '0', is_active: true });
+    setCategoryForm({ name: '', description: '', sort_order: '0', is_active: true, gst_percentage: '0' });
     setEditingCategory(null);
   };
 
@@ -1179,6 +1253,7 @@ export default function AdminDashboard() {
       description: category.description || '',
       sort_order: category.sort_order.toString(),
       is_active: category.is_active,
+      gst_percentage: category.gst_percentage ? category.gst_percentage.toString() : '0',
     });
     setCategoryDialogOpen(true);
   };
@@ -1605,6 +1680,70 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       
+                      {/* Branding Section */}
+                      <div>
+                        <Label htmlFor="brand">Brand</Label>
+                        <Input
+                          id="brand"
+                          value={productForm.brand}
+                          onChange={(e) => setProductForm({ ...productForm, brand: e.target.value })}
+                          placeholder="e.g., Nike, Apple, Samsung"
+                          className="mt-1 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="brand_logo">Brand Logo</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => brandLogoInputRef.current?.click()}
+                            disabled={uploadingBrandLogo}
+                            className="w-full"
+                          >
+                            {uploadingBrandLogo ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Uploading...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4 mr-2" />
+                                Choose Brand Logo
+                              </>
+                            )}
+                          </Button>
+                          {productForm.brand_logo_url && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setProductForm({ ...productForm, brand_logo_url: '' })}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                        {productForm.brand_logo_url && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <img
+                              src={productForm.brand_logo_url}
+                              alt="Brand Logo"
+                              className="w-12 h-12 rounded-full object-cover border border-border"
+                            />
+                            <span className="text-xs text-muted-foreground">Logo uploaded</span>
+                          </div>
+                        )}
+                        <input
+                          ref={brandLogoInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleBrandLogoUpload}
+                          className="hidden"
+                          id="brand_logo"
+                        />
+                      </div>
+
                       {/* Dimensions - Separate Fields */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
@@ -1638,6 +1777,48 @@ export default function AdminDashboard() {
                           />
                         </div>
                       </div>
+
+                      {/* Seller Section */}
+                      <div>
+                        <Label htmlFor="seller_name">Seller Name</Label>
+                        <Input
+                          id="seller_name"
+                          value={productForm.seller_name}
+                          onChange={(e) => setProductForm({ ...productForm, seller_name: e.target.value })}
+                          placeholder="e.g., ABC Electronics, XYZ Store"
+                          className="mt-1 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="seller_description">Seller Description</Label>
+                        <Textarea
+                          id="seller_description"
+                          value={productForm.seller_description}
+                          onChange={(e) => setProductForm({ ...productForm, seller_description: e.target.value })}
+                          placeholder="Tell us about the seller, their reputation, experience, etc."
+                          className="mt-1 text-sm min-h-[80px]"
+                        />
+                      </div>
+
+                      {/* GST Section */}
+                      <div>
+                        <Label htmlFor="gst_percentage">GST (%) - Leave empty to use category GST</Label>
+                        <Input
+                          id="gst_percentage"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          value={productForm.gst_percentage}
+                          onChange={(e) => setProductForm({ ...productForm, gst_percentage: e.target.value })}
+                          placeholder="e.g., 18, 5, 12"
+                          className="mt-1 text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          If set, this will override the category GST
+                        </p>
+                      </div>
+
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <Label htmlFor="price">Price (₹) *</Label>
@@ -2902,14 +3083,28 @@ export default function AdminDashboard() {
                             className="mt-1"
                           />
                         </div>
-                        <div className="flex items-center gap-2 pt-6">
-                          <Switch
-                            id="cat_active"
-                            checked={categoryForm.is_active}
-                            onCheckedChange={(checked) => setCategoryForm({ ...categoryForm, is_active: checked })}
+                        <div>
+                          <Label htmlFor="cat_gst">Category GST (%)</Label>
+                          <Input
+                            id="cat_gst"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={categoryForm.gst_percentage}
+                            onChange={(e) => setCategoryForm({ ...categoryForm, gst_percentage: e.target.value })}
+                            placeholder="e.g., 18"
+                            className="mt-1"
                           />
-                          <Label htmlFor="cat_active">Active</Label>
                         </div>
+                      </div>
+                      <div className="flex items-center gap-2 pt-2">
+                        <Switch
+                          id="cat_active"
+                          checked={categoryForm.is_active}
+                          onCheckedChange={(checked) => setCategoryForm({ ...categoryForm, is_active: checked })}
+                        />
+                        <Label htmlFor="cat_active">Active</Label>
                       </div>
                       <Button
                         type="submit"

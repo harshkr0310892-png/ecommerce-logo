@@ -236,12 +236,60 @@ export default function TrackOrder() {
   };
 
   // Generate Invoice PDF
-  const generateInvoice = () => {
+  const generateInvoice = async () => {
     if (!order || orderItems.length === 0) return;
     
     setGeneratingInvoice(true);
     
     try {
+      // Calculate GST from products
+      let totalGST = 0;
+      
+      for (const item of orderItems) {
+        try {
+          const { data: product } = await supabase
+            .from('products')
+            .select('gst_percentage, category_id')
+            .eq('id', item.product_id)
+            .maybeSingle();
+          
+          if (product) {
+            let gstPercent = 0;
+            
+            // Product GST takes priority
+            if (product.gst_percentage && product.gst_percentage > 0) {
+              gstPercent = product.gst_percentage;
+            }
+            // Fall back to category GST
+            else if (product.category_id) {
+              const { data: category } = await supabase
+                .from('categories')
+                .select('gst_percentage')
+                .eq('id', product.category_id)
+                .maybeSingle();
+              
+              if (category && category.gst_percentage && category.gst_percentage > 0) {
+                gstPercent = category.gst_percentage;
+              }
+            }
+            
+            const itemTotal = Number(item.product_price) * item.quantity;
+            totalGST += itemTotal * (gstPercent / 100);
+          }
+        } catch (error) {
+          console.error('Error calculating GST for item:', error);
+        }
+      }
+      
+      // Calculate subtotal (before GST and shipping)
+      const subtotal = Number(order.total) - totalGST;
+      
+      // Calculate shipping charge
+      const shippingCharge = subtotal < 800 ? 40 : 0;
+      
+      // Calculate actual subtotal (before GST and shipping)
+      const actualSubtotal = subtotal - shippingCharge;
+      
       // Create invoice HTML content
       const invoiceContent = `
         <!DOCTYPE html>
@@ -326,8 +374,14 @@ export default function TrackOrder() {
             <div class="total-section">
               <div class="total-row">
                 <span>Subtotal:</span>
-                <span>₹${Number(order.total).toFixed(2)}</span>
+                <span>₹${subtotal.toFixed(2)}</span>
               </div>
+              ${totalGST > 0 ? `
+              <div class="total-row">
+                <span>GST:</span>
+                <span>₹${totalGST.toFixed(2)}</span>
+              </div>
+              ` : ''}
               <div class="total-row">
                 <span>Shipping:</span>
                 <span>FREE</span>

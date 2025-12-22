@@ -62,6 +62,79 @@ export default function Checkout() {
   });
 
   const subtotal = getDiscountedTotal();
+  
+  // Calculate GST
+  const [gstAmount, setGstAmount] = React.useState(0);
+  
+  React.useEffect(() => {
+    const calculateGST = async () => {
+      let totalGST = 0;
+      
+      for (const item of items) {
+        try {
+          const productId = item.product_id || item.id;
+          
+          // Fetch product with GST info - GST applies to all variants of this product
+          const { data: product, error } = await supabase
+            .from('products')
+            .select('gst_percentage, category_id')
+            .eq('id', productId)
+            .maybeSingle();
+          
+          if (error) {
+            console.error('Error fetching product for GST:', error);
+            continue;
+          }
+          
+          if (!product) {
+            console.warn('Product not found for GST calculation:', productId);
+            continue;
+          }
+          
+          let gstPercent = 0;
+          
+          // Product GST takes priority
+          if (product.gst_percentage !== null && product.gst_percentage !== undefined && product.gst_percentage > 0) {
+            gstPercent = product.gst_percentage;
+            console.log(`Product ${productId} GST: ${gstPercent}%`);
+          }
+          // Fall back to category GST
+          else if (product.category_id) {
+            const { data: category, error: catError } = await supabase
+              .from('categories')
+              .select('gst_percentage')
+              .eq('id', product.category_id)
+              .maybeSingle();
+            
+            if (!catError && category && category.gst_percentage && category.gst_percentage > 0) {
+              gstPercent = category.gst_percentage;
+              console.log(`Category GST for ${productId}: ${gstPercent}%`);
+            }
+          }
+          
+          // Calculate price with discount
+          const discountedPrice = item.price * (1 - item.discount_percentage / 100);
+          const itemTotal = discountedPrice * item.quantity;
+          
+          // Calculate GST on discounted price
+          const itemGST = itemTotal * (gstPercent / 100);
+          totalGST += itemGST;
+          console.log(`Item ${item.name}: Price=${item.price}, Discount=${item.discount_percentage}%, Discounted=${discountedPrice}, Qty=${item.quantity}, GST%=${gstPercent}, ItemGST=${itemGST}`);
+        } catch (error) {
+          console.error('Error calculating GST for item:', item.id, error);
+        }
+      }
+      
+      console.log('Total GST Amount:', totalGST);
+      setGstAmount(totalGST);
+    };
+    
+    if (items.length > 0) {
+      calculateGST();
+    } else {
+      setGstAmount(0);
+    }
+  }, [items]);
     
     // Get client IP on component mount
     React.useEffect(() => {
@@ -82,7 +155,12 @@ export default function Checkout() {
   };
 
   const couponDiscount = calculateCouponDiscount();
-  const total = subtotal - couponDiscount;
+  const subtotalAfterCoupon = subtotal - couponDiscount;
+  
+  // Calculate shipping charge based on order subtotal
+  const shippingCharge = subtotal < 800 ? 40 : 0;
+  
+  const total = subtotalAfterCoupon + gstAmount + shippingCharge;
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -946,6 +1024,16 @@ export default function Checkout() {
                     <span>-₹{couponDiscount.toFixed(2)}</span>
                   </div>
                 )}
+                {gstAmount > 0 && (
+                  <div className="flex justify-between text-orange-600 dark:text-orange-400">
+                    <span>GST</span>
+                    <span>+₹{gstAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Shipping</span>
+                  <span>{shippingCharge > 0 ? `+₹${shippingCharge.toFixed(2)}` : 'FREE'}</span>
+                </div>
                 <div className="flex justify-between pt-3 border-t border-border">
                   <span className="font-display text-lg font-semibold">Total</span>
                   <span className="font-display text-2xl font-bold text-primary">

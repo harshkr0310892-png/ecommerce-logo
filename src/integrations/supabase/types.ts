@@ -22,6 +22,7 @@ export type Database = {
           is_active: boolean | null
           name: string
           sort_order: number | null
+          gst_percentage: number | null
         }
         Insert: {
           created_at?: string
@@ -30,6 +31,7 @@ export type Database = {
           is_active?: boolean | null
           name: string
           sort_order?: number | null
+          gst_percentage?: number | null
         }
         Update: {
           created_at?: string
@@ -38,6 +40,7 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           sort_order?: number | null
+          gst_percentage?: number | null
         }
         Relationships: []
       }
@@ -490,6 +493,13 @@ export type Database = {
           detailed_description: string | null
           dimensions: string | null
           cash_on_delivery: boolean | null
+          // Add branding and seller fields
+          brand: string | null
+          brand_logo_url: string | null
+          seller_name: string | null
+          seller_description: string | null
+          // Add GST field
+          gst_percentage: number | null
         }
         Insert: {
           category_id?: string | null
@@ -509,6 +519,13 @@ export type Database = {
           detailed_description?: string | null
           dimensions?: string | null
           cash_on_delivery?: boolean | null
+          // Add branding and seller fields
+          brand?: string | null
+          brand_logo_url?: string | null
+          seller_name?: string | null
+          seller_description?: string | null
+          // Add GST field
+          gst_percentage?: number | null
         }
         Update: {
           category_id?: string | null
@@ -528,6 +545,13 @@ export type Database = {
           detailed_description?: string | null
           dimensions?: string | null
           cash_on_delivery?: boolean | null
+          // Add branding and seller fields
+          brand?: string | null
+          brand_logo_url?: string | null
+          seller_name?: string | null
+          seller_description?: string | null
+          // Add GST field
+          gst_percentage?: number | null
         }
         Relationships: [
           {
