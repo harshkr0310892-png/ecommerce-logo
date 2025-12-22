@@ -19,24 +19,25 @@
     --popover: 45 25% 95%;
     --popover-foreground: 30 20% 15%;
 
-    --primary: 43 74% 49%;
-    --primary-foreground: 30 20% 10%;
+    /* Updated primary to #16181D for light theme buttons */
+    --primary: 220 12% 10%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 15% 88%;
-    --secondary-foreground: 30 20% 20%;
+    --secondary: 220 12% 10%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 30 10% 90%;
     --muted-foreground: 30 10% 45%;
 
-    --accent: 43 60% 55%;
-    --accent-foreground: 30 20% 10%;
+    --accent: 220 12% 10%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 30 20% 85%;
     --input: 30 20% 85%;
-    --ring: 43 74% 49%;
+    --ring: 220 12% 10%;
 
     --radius: 0.5rem;
 
@@ -47,19 +48,23 @@
     --cream: 45 30% 97%;
     --cream-dark: 40 20% 90%;
     --royal-text: 30 20% 15%;
+    
+    /* Button specific color for light theme */
+    --button-bg: 220 12% 10%;
+    --button-text: 0 0% 100%;
 
     --sidebar-background: 45 25% 95%;
     --sidebar-foreground: 30 20% 20%;
-    --sidebar-primary: 43 74% 49%;
-    --sidebar-primary-foreground: 30 20% 10%;
-    --sidebar-accent: 30 15% 88%;
-    --sidebar-accent-foreground: 30 20% 20%;
+    --sidebar-primary: 220 12% 10%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 12% 10%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 30 20% 85%;
-    --sidebar-ring: 43 74% 49%;
+    --sidebar-ring: 220 12% 10%;
   }
 
   .dark {
-    /* Royal Dark Theme - Deep Charcoal & Gold */
+    /* Royal Dark Theme - Deep Charcoal & Gold (DEFAULT - unchanged) */
     --background: 220 20% 10%;
     --foreground: 45 20% 92%;
 
@@ -95,6 +100,10 @@
     --cream: 45 20% 92%;
     --cream-dark: 220 20% 10%;
     --royal-text: 45 20% 92%;
+    
+    /* Button specific color for dark theme */
+    --button-bg: 43 74% 55%;
+    --button-text: 220 20% 10%;
 
     --sidebar-background: 220 18% 12%;
     --sidebar-foreground: 45 20% 90%;
@@ -118,6 +127,27 @@
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
+  }
+}
+
+/* Light theme button overrides */
+@layer components {
+  :root button,
+  :root [role="button"],
+  :root .btn {
+    --tw-bg-opacity: 1;
+  }
+  
+  /* Force #16181D on all button variants in light theme */
+  :root:not(.dark) button:not([data-variant="ghost"]):not([data-variant="link"]):not([data-variant="outline"]),
+  :root:not(.dark) [role="button"]:not([data-variant="ghost"]):not([data-variant="link"]):not([data-variant="outline"]) {
+    background-color: #16181D !important;
+    color: #ffffff !important;
+  }
+  
+  :root:not(.dark) button:not([data-variant="ghost"]):not([data-variant="link"]):not([data-variant="outline"]):hover,
+  :root:not(.dark) [role="button"]:not([data-variant="ghost"]):not([data-variant="link"]):not([data-variant="outline"]):hover {
+    background-color: #2a2d35 !important;
   }
 }
 
@@ -159,6 +189,21 @@
 
   .royal-glow {
     box-shadow: 0 0 30px hsl(var(--gold) / 0.2);
+  }
+  
+  /* Light theme button utility */
+  .btn-dark {
+    background-color: #16181D;
+    color: #ffffff;
+  }
+  
+  .btn-dark:hover {
+    background-color: #2a2d35;
+  }
+  
+  .dark .btn-dark {
+    background-color: hsl(var(--gold));
+    color: hsl(var(--primary-foreground));
   }
 }
 
@@ -264,6 +309,7 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--gold));
 }
+
 .text-secondary-foreground {
     color: hsl(46deg 90% 56%);
 }
