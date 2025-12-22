@@ -285,7 +285,7 @@ export default function TrackOrder() {
       const subtotal = Number(order.total) - totalGST;
       
       // Calculate shipping charge
-      const shippingCharge = subtotal < 800 ? 40 : 0;
+      const shippingCharge = subtotal < 300 ? 40 : 0;
       
       // Calculate actual subtotal (before GST and shipping)
       const actualSubtotal = subtotal - shippingCharge;

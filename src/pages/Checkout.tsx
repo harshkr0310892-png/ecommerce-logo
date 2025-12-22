@@ -158,7 +158,7 @@ export default function Checkout() {
   const subtotalAfterCoupon = subtotal - couponDiscount;
   
   // Calculate shipping charge based on order subtotal
-  const shippingCharge = subtotal < 800 ? 40 : 0;
+  const shippingCharge = subtotal < 300 ? 40 : 0;
   
   const total = subtotalAfterCoupon + gstAmount + shippingCharge;
 
